@@ -1,0 +1,36 @@
+﻿<Window x:Class="Target.Utility.Windows.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local1="clr-namespace:Target.Utility.Windows"
+        xmlns:viewModels="clr-namespace:Target.Utility.ViewModels"
+        mc:Ignorable="d"
+        d:DataContext="{d:DesignInstance Type=viewModels:SplitImagViewViewModel}"
+        Title="Target Utility" Height="900" Width="1600">
+    <DockPanel>
+        <local1:Menu DockPanel.Dock="Top" />
+
+        <Canvas x:Name="Canvas"
+                ClipToBounds="True"
+                AllowDrop="True"
+                MouseLeftButtonDown="Canvas_OnMouseLeftButtonDown"
+                MouseLeftButtonUp="Canvas_OnMouseLeftButtonUp"
+                MouseMove="Canvas_OnMouseMove"
+                Drop="UIElement_OnDrop">
+            <Image x:Name="Image"
+                   Source="{Binding ImageSource}"
+                   Height="{Binding ImageHeight}"
+                   Width="{Binding ImageWidth}"
+                   MouseLeftButtonDown="Image_OnMouseLeftButtonDown"
+                   MouseLeftButtonUp="Image_OnMouseLeftButtonUp"
+                   PreviewMouseRightButtonDown="Image_OnPreviewMouseRightButtonDown"
+                   MouseMove="Image_OnMouseMove"
+                   MouseWheel="Image_OnMouseWheel"/>
+            <Rectangle x:Name="TargetSelectionRectanlge"
+                       Stroke="Red"
+                       Visibility="Collapsed"/>
+        </Canvas>
+    </DockPanel>
+</Window>
+

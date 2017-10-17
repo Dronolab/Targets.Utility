@@ -1,0 +1,32 @@
+﻿<UserControl x:Class="Target.Utility.Windows.Menu"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Target.Utility"
+             xmlns:viewModels="clr-namespace:Target.Utility.ViewModels"
+             mc:Ignorable="d" 
+             d:DataContext="{d:DesignInstance Type=viewModels:MenuControlViewModel}"
+             d:DesignHeight="300" d:DesignWidth="300">
+    <Grid>
+        <Menu>
+            <MenuItem Header="** File">
+                <MenuItem Header="** Load Image" Command="{Binding LoadImageCommand}"/>
+            </MenuItem>
+            <MenuItem Header="** Actions">
+                <MenuItem Header="** Slice" Command="{Binding SliceCommand}"/>
+                <MenuItem Header="** View Resized Image" Command="{Binding ViewResizedImageCommand}"/>
+                <MenuItem Header="** Restore Default Size" Command="{Binding RestoreImageCommand}"/>
+                <MenuItem Header="** Reset target selection" Command="{Binding ResetTargetSelectionCommand}"/>
+                <MenuItem Header="** Add 32 pixels divisions" Command="{Binding Add32PxDicisionCommand}"/>
+            </MenuItem>
+            <MenuItem Header="** Settings">
+                <MenuItem Header="** Image Settings" Command="{Binding EditSettingsCommand}"/>
+                <MenuItem Header="** Application Settings"/>
+            </MenuItem>
+        </Menu>
+        <TextBlock HorizontalAlignment="Right"
+                   Margin="8,0"
+                   Text="{Binding ImageSize}"/>
+    </Grid>
+</UserControl>
