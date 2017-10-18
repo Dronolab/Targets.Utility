@@ -20,6 +20,10 @@ namespace Target.Utility
         private string _imageFilePath;
         private static readonly object Padlock = new object();
 
+        // Applicable settings. We have a settings class, but sometime we don't want to use them
+        private int _applicableMultiple = -1;
+        private double _applicableTolerance = -1;
+
         #endregion
 
         #region Constructors
@@ -110,6 +114,8 @@ namespace Target.Utility
 
         public void SliceImage(TargetSelectionRegion selection)
         {
+            this._applicableMultiple = Settings.Default.ResizeMultiple;
+            this._applicableTolerance = Settings.Default.Tolerance;
 
             Image resizedImage = null;
             if (Settings.Default.ResizeImage)
@@ -124,7 +130,7 @@ namespace Target.Utility
                 resizedImage = this.ResizeImage((imageToResize.Width / m) * m, (imageToResize.Height / m) * m);
                 this.ResizeSelection(ref selection);
             }
-            this.FlatternSelection(ref selection);
+            //this.FlatternSelection(ref selection);
 
             var desktopPath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
             var slicesPath = Path.Combine(desktopPath, $"{DateTime.Now:yyyy-MM-dd HH-mm-ss} - slices");
@@ -166,6 +172,12 @@ namespace Target.Utility
             selection.EndPixel = new Point(Convert.ToInt32(newEndX), Convert.ToInt32(newEndY));
         }
 
+        /// <summary>
+        /// Deprecated
+        /// </summary>
+        /// <param name="selection"></param>
+        /// <param name="tolerance"></param>
+        /// <param name="multiple"></param>
         private void FlattenrStartPoint(ref TargetSelectionRegion selection, double tolerance, double multiple)
         {
             var distanteStartX = selection.StartPixel.X % multiple;
@@ -191,6 +203,12 @@ namespace Target.Utility
             }
         }
 
+        /// <summary>
+        /// Deprecated
+        /// </summary>
+        /// <param name="selection"></param>
+        /// <param name="tolerance"></param>
+        /// <param name="multiple"></param>
         private void FlatternEndPoint(ref TargetSelectionRegion selection, double tolerance, double multiple)
         {
             var targetWidth = selection.EndPixel.X - selection.StartPixel.X;
@@ -219,6 +237,10 @@ namespace Target.Utility
             }
         }
 
+        /// <summary>
+        /// Deprecated
+        /// </summary>
+        /// <param name="selection"></param>
         private void FlatternSelection(ref TargetSelectionRegion selection)
         {
             var multiple = Settings.Default.ResizeMultiple;
@@ -234,21 +256,28 @@ namespace Target.Utility
             // todo
         }
 
+        /// <summary>
+        /// Deprecated
+        /// </summary>
+        /// <param name="distance"></param>
+        /// <param name="tolerance"></param>
+        /// <param name="multiple"></param>
+        /// <returns></returns>
         private bool DontRespectTolerance(double distance, double tolerance, double multiple)
         {
-            return distance <= tolerance || distance >= multiple - tolerance;
+            return distance <= multiple * tolerance || distance >= multiple - multiple * tolerance;
         }
 
         private void CreateMiniatures(Image image, string sliceDirectoryPath, TargetSelectionRegion selection)
         {
-            var multiple = Settings.Default.ResizeMultiple;
+            var multiple = this._applicableMultiple;
 
             var width = Settings.Default.ResizeWidth;
             var height = Settings.Default.ResizeHeight;
 
             if (!Settings.Default.ResizeImage)
             {
-                width= image.Width / multiple * multiple;
+                width = image.Width / multiple * multiple;
                 height = image.Height / multiple * multiple;
             }
 
@@ -278,13 +307,75 @@ namespace Target.Utility
                     }
                 }
             }
+
+            this.CreateMiniatureOfTarget(image, sliceDirectoryPath, selection);
+        }
+
+        private void CreateMiniatureOfTarget(Image image, string sliceDirectoryPath, TargetSelectionRegion selection)
+        {
+            // Settings
+            var t = this._applicableTolerance;
+            var m = this._applicableMultiple;
+
+            var tw = selection.EndPixel.X - selection.StartPixel.X; // target width
+            var th = selection.EndPixel.Y - selection.StartPixel.Y; // target height
+
+            // Rework endpoint flages
+            var reworkWith = false;
+            var reworkHeight = false;
+
+            var wd = tw % m; // Width overflow
+            if (tw > m && this.DontRespectTolerance(wd, t, m))
+            {
+                reworkWith = true;
+            }
+
+            var hd = th % m; // Width overflow
+            if (th > m && this.DontRespectTolerance(hd, t, m))
+            {
+                reworkHeight = true;
+            }
+
+            if (reworkWith || reworkHeight)
+            {
+                var oldPoint = selection.EndPixel;
+                var newX = reworkWith ? wd + t * m >= m ? oldPoint.X + m : oldPoint.X - wd : oldPoint.X; // shorthen of enlarge selection
+                var newY = reworkHeight ? hd + t * m >= m ? oldPoint.Y + m : oldPoint.Y - hd : oldPoint.Y; // shorthen of enlarge selection
+                selection.EndPixel = new Point(newX, newY); // We want a selection that is a multiple of multiple
+            }
+
+            for (int i = selection.StartPixel.X; i < selection.EndPixel.X; i += 32)
+            {
+                for (int j = selection.StartPixel.Y; j < selection.EndPixel.Y; j += 32)
+                {
+                    var img = new Bitmap(m, m);
+                    var counter = 10001;
+                    using (var graphics = Graphics.FromImage(img))
+                    {
+                        graphics.DrawImage(image, new Rectangle(0, 0, m, m), new Rectangle(i, j, m, m), GraphicsUnit.Pixel);
+
+                        img.Save(Path.Combine(sliceDirectoryPath, $"AAA - {counter}.jpg"));
+                        counter += 2;
+                    }
+                }
+            }
         }
 
         private bool IsInRange(int i, int j, TargetSelectionRegion selection)
         {
-            var inRange = i >= selection.StartPixel.X && i <= selection.EndPixel.X;
+            var sx = selection.StartPixel.X;
+            var sy = selection.StartPixel.Y;
+            var ex = selection.EndPixel.X;
+            var ey = selection.EndPixel.Y;
 
-            if (!(j >= selection.StartPixel.Y && j <= selection.EndPixel.Y))
+            //settings
+            var m = this._applicableMultiple;
+
+            //            [Check if start is there]   [check if end is there]
+            var inRange = sx >= i && sx < i + m || ex > i && ex < i + 32;
+
+            //   [Check if start is there]  [check if end is there]
+            if (!(sy >= j && sy < j + m || ey > j && ey < j + 32))
             {
                 inRange = false;
             }
