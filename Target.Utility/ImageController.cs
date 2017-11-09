@@ -356,19 +356,31 @@ namespace Target.Utility
                     {
                         graphics.DrawImage(image, new Rectangle(0, 0, multiple, multiple), new Rectangle(i * multiple, j * multiple, multiple, multiple), GraphicsUnit.Pixel);
 
+                        var hasTarget = false;
                         foreach (var selection in selections)
                         {
                             if (IsInRange(i * multiple, j * multiple, selection))
                             {
-                                counter += 1;
-                                img.Save(Path.Combine(sliceDirectoryPath, $"AAA - {counter}.jpg"));
-                                counter += 1;
+                                hasTarget = true;
                             }
-                            else
-                            {
-                                img.Save(Path.Combine(sliceDirectoryPath, $"{counter}.jpg"));
-                                counter += 2;
-                            }
+                        }
+
+                        // S'il y a une target, on veut le counter à un nombre impair
+                        if (hasTarget)
+                        {
+                            counter++;
+                        }
+
+                        img.Save(Path.Combine(sliceDirectoryPath, $"{counter}.jpg"));
+
+                        // S'il y avait une target, on veut remettre le counter à un nombre pair
+                        if (hasTarget)
+                        {
+                            counter++;
+                        }
+                        else // on passe d'un nombre pair à un nombre pair
+                        {
+                            counter += 2;
                         }
                     }
                 }
