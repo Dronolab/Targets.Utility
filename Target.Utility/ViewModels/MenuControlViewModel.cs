@@ -16,11 +16,12 @@ namespace Target.Utility.ViewModels
 
         #endregion
 
-        #region Constructors.
+        #region Constructors
 
         public MenuControlViewModel()
         {
             this.LoadImageCommand = new RelayCommand(LoadImage);
+            this.ResizeBatchCommand = new RelayCommand(ResizeBatch);
             this.ViewResizedImageCommand = new RelayCommand(ViewResizedImage);
             this.Add32PxDicisionCommand = new RelayCommand(Add32PxDicision);
             this.RestoreImageCommand = new RelayCommand(RestoreImage);
@@ -35,6 +36,7 @@ namespace Target.Utility.ViewModels
         #region Properties
 
         public ICommand LoadImageCommand { get; set; }
+        public ICommand ResizeBatchCommand { get; set; }
 
         public ICommand Add32PxDicisionCommand { get; set; }
 
@@ -81,6 +83,11 @@ namespace Target.Utility.ViewModels
         {
             // Validate if there is a picture loaded and that a selection has been made
             return true;
+        }
+
+        private void ResizeBatch(object obj)
+        {
+            ImageController.Instance.ResizeBatch();
         }
 
         private void Slice(object parameter)

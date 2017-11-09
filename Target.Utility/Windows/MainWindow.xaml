@@ -7,7 +7,8 @@
         xmlns:viewModels="clr-namespace:Target.Utility.ViewModels"
         mc:Ignorable="d"
         d:DataContext="{d:DesignInstance Type=viewModels:SplitImagViewViewModel}"
-        Title="Target Utility" Height="900" Width="1600">
+        MouseMove="MainWindow_OnMouseMove"
+        Title="Si j'ai un pouce de plus ma blonde sera contente en criss - Jay" Height="900" Width="1600">
     <DockPanel>
         <local1:Menu DockPanel.Dock="Top" />
 
@@ -27,9 +28,13 @@
                    PreviewMouseRightButtonDown="Image_OnPreviewMouseRightButtonDown"
                    MouseMove="Image_OnMouseMove"
                    MouseWheel="Image_OnMouseWheel"/>
-            <Rectangle x:Name="TargetSelectionRectanlge"
-                       Stroke="Red"
-                       Visibility="Collapsed"/>
+            <!--<Line x:Name="HorizontalLine" Stroke="Black"/>
+            <Line x:Name="VerticalLine" Stroke="Black"/>
+            <Rectangle x:Name="PreviewSelectionRectangle" 
+                       Canvas.Top="50"
+                       Canvas.Left="50"
+                       StrokeThickness="1"
+                       Stroke="Black"/>-->
         </Canvas>
     </DockPanel>
 </Window>

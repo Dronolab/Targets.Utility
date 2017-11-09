@@ -1,13 +1,17 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.IO;
+using System.Linq;
+using System.Windows;
 using System.Windows.Documents;
 using System.Windows.Media.Imaging;
 using Microsoft.Win32;
 using Target.Utility.Events;
 using Target.Utility.Properties;
+using Point = System.Drawing.Point;
 
 namespace Target.Utility
 {
@@ -71,6 +75,64 @@ namespace Target.Utility
             }
         }
 
+        public void ResizeBatch()
+        {
+            var dlg = new OpenFileDialog
+            {
+                DefaultExt = ".jpg",
+                Multiselect = true,
+                Filter = "Image files (*.jpg, *.jpeg, *.jpe, *.jfif, *.png) | *.jpg; *.jpeg; *.jpe; *.jfif; *.png"
+            };
+
+            var result = dlg.ShowDialog();
+
+            if (result == true)
+            {
+                var files = dlg.FileNames.ToList();
+
+                var desktopPath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+                var resizedPath = Path.Combine(desktopPath, $"{DateTime.Now:yyyy-MM-dd HH-mm-ss} - Resized");
+                Directory.CreateDirectory(resizedPath);
+
+                var counter = 0;
+                foreach (var filePath in files)
+                {
+                    ResizeImageDep(Settings.Default.ResizeWidth, Settings.Default.ResizeHeight, filePath, Path.Combine(resizedPath, $"{counter++}.jpg"));
+                }
+
+                MessageBox.Show("Done");
+            }
+        }
+
+        private void ResizeImageDep(int width, int height, string imagePath, string fileName)
+        {
+            var imageToResize = Image.FromFile(imagePath);
+
+            var destRect = new Rectangle(0, 0, width, height);
+            var destImage = new Bitmap(width, height);
+
+            using (var graphics = Graphics.FromImage(destImage))
+            {
+                graphics.CompositingMode = CompositingMode.SourceCopy;
+                graphics.CompositingQuality = CompositingQuality.HighQuality;
+                graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
+                graphics.SmoothingMode = SmoothingMode.HighQuality;
+                graphics.PixelOffsetMode = PixelOffsetMode.HighQuality;
+
+                using (var wrapMode = new ImageAttributes())
+                {
+                    wrapMode.SetWrapMode(WrapMode.TileFlipXY);
+                    graphics.DrawImage(imageToResize, destRect, 0, 0, imageToResize.Width, imageToResize.Height, GraphicsUnit.Pixel, wrapMode);
+
+                    destImage.Save(fileName);
+                    wrapMode.Dispose();
+                }
+                graphics.Dispose();
+            }
+            imageToResize.Dispose();
+            destImage.Dispose();
+        }
+
         public void LoadImage(string filePath)
         {
             if (filePath != null)
@@ -112,7 +174,7 @@ namespace Target.Utility
             return destImage;
         }
 
-        public void SliceImage(TargetSelectionRegion selection)
+        public void SliceImage(List<TargetSelectionRegion> selections)
         {
             this._applicableMultiple = Settings.Default.ResizeMultiple;
             this._applicableTolerance = Settings.Default.Tolerance;
@@ -121,14 +183,14 @@ namespace Target.Utility
             if (Settings.Default.ResizeImage)
             {
                 resizedImage = this.ResizeImage(Settings.Default.ResizeWidth, Settings.Default.ResizeHeight);
-                this.ResizeSelection(ref selection);
+                this.ResizeSelection(ref selections);
             }
             else
             {
                 var m = Settings.Default.ResizeMultiple;
                 var imageToResize = Image.FromFile(this._imageFilePath);
                 resizedImage = this.ResizeImage((imageToResize.Width / m) * m, (imageToResize.Height / m) * m);
-                this.ResizeSelection(ref selection);
+                this.ResizeSelection(ref selections);
             }
             //this.FlatternSelection(ref selection);
 
@@ -137,7 +199,7 @@ namespace Target.Utility
             Directory.CreateDirectory(slicesPath);
 
             // Start slicing
-            this.CreateMiniatures(resizedImage, slicesPath, selection); // needs the user selection
+            this.CreateMiniatures(resizedImage, slicesPath, selections); // needs the user selection
         }
 
         #endregion
@@ -147,7 +209,7 @@ namespace Target.Utility
 
         #region Private
 
-        private void ResizeSelection(ref TargetSelectionRegion selection)
+        private void ResizeSelection(ref List<TargetSelectionRegion> selections)
         {
             // First we need to check how much the main image has been resized
             var imageToResize = Image.FromFile(this._imageFilePath);
@@ -158,18 +220,21 @@ namespace Target.Utility
             var widthProp = width / (double)imageToResize.Width;
             var heightProp = height / (double)imageToResize.Height;
 
-            var startX = selection.StartPixel.X;
-            var startY = selection.StartPixel.Y;
-            var endX = selection.EndPixel.X;
-            var endY = selection.EndPixel.Y;
+            foreach (var selection in selections)
+            {
+                var startX = selection.StartPixel.X;
+                var startY = selection.StartPixel.Y;
+                var endX = selection.EndPixel.X;
+                var endY = selection.EndPixel.Y;
 
-            var newStartX = Math.Round(startX * widthProp);
-            var newStartY = Math.Round(startY * heightProp);
-            var newEndX = Math.Round(endX * widthProp);
-            var newEndY = Math.Round(endY * heightProp);
+                var newStartX = Math.Round(startX * widthProp);
+                var newStartY = Math.Round(startY * heightProp);
+                var newEndX = Math.Round(endX * widthProp);
+                var newEndY = Math.Round(endY * heightProp);
 
-            selection.StartPixel = new Point(Convert.ToInt32(newStartX), Convert.ToInt32(newStartY));
-            selection.EndPixel = new Point(Convert.ToInt32(newEndX), Convert.ToInt32(newEndY));
+                selection.StartPixel = new Point(Convert.ToInt32(newStartX), Convert.ToInt32(newStartY));
+                selection.EndPixel = new Point(Convert.ToInt32(newEndX), Convert.ToInt32(newEndY));
+            }
         }
 
         /// <summary>
@@ -268,7 +333,7 @@ namespace Target.Utility
             return distance <= multiple * tolerance || distance >= multiple - multiple * tolerance;
         }
 
-        private void CreateMiniatures(Image image, string sliceDirectoryPath, TargetSelectionRegion selection)
+        private void CreateMiniatures(Image image, string sliceDirectoryPath, List<TargetSelectionRegion> selections)
         {
             var multiple = this._applicableMultiple;
 
@@ -291,71 +356,75 @@ namespace Target.Utility
                     {
                         graphics.DrawImage(image, new Rectangle(0, 0, multiple, multiple), new Rectangle(i * multiple, j * multiple, multiple, multiple), GraphicsUnit.Pixel);
 
-                        // If there is a target or a part of a target, save as uneven number. Otherwise save as even number
-                        // todo
-                        if (IsInRange(i * multiple, j * multiple, selection))
+                        foreach (var selection in selections)
                         {
-                            counter += 1;
-                            img.Save(Path.Combine(sliceDirectoryPath, $"AAA - {counter}.jpg"));
-                            counter += 1;
-                        }
-                        else
-                        {
-                            img.Save(Path.Combine(sliceDirectoryPath, $"{counter}.jpg"));
-                            counter += 2;
+                            if (IsInRange(i * multiple, j * multiple, selection))
+                            {
+                                counter += 1;
+                                img.Save(Path.Combine(sliceDirectoryPath, $"AAA - {counter}.jpg"));
+                                counter += 1;
+                            }
+                            else
+                            {
+                                img.Save(Path.Combine(sliceDirectoryPath, $"{counter}.jpg"));
+                                counter += 2;
+                            }
                         }
                     }
                 }
             }
 
-            this.CreateMiniatureOfTarget(image, sliceDirectoryPath, selection);
+            this.CreateMiniatureOfTarget(image, sliceDirectoryPath, selections);
         }
 
-        private void CreateMiniatureOfTarget(Image image, string sliceDirectoryPath, TargetSelectionRegion selection)
+        private void CreateMiniatureOfTarget(Image image, string sliceDirectoryPath, List<TargetSelectionRegion> selections)
         {
             // Settings
             var t = this._applicableTolerance;
             var m = this._applicableMultiple;
+            var counter = 10001;
 
-            var tw = selection.EndPixel.X - selection.StartPixel.X; // target width
-            var th = selection.EndPixel.Y - selection.StartPixel.Y; // target height
-
-            // Rework endpoint flages
-            var reworkWith = false;
-            var reworkHeight = false;
-
-            var wd = tw % m; // Width overflow
-            if (tw > m && this.DontRespectTolerance(wd, t, m))
+            foreach (var selection in selections)
             {
-                reworkWith = true;
-            }
+                var tw = selection.EndPixel.X - selection.StartPixel.X; // target width
+                var th = selection.EndPixel.Y - selection.StartPixel.Y; // target height
 
-            var hd = th % m; // Width overflow
-            if (th > m && this.DontRespectTolerance(hd, t, m))
-            {
-                reworkHeight = true;
-            }
+                // Rework endpoint flages
+                var reworkWith = false;
+                var reworkHeight = false;
 
-            if (reworkWith || reworkHeight)
-            {
-                var oldPoint = selection.EndPixel;
-                var newX = reworkWith ? wd + t * m >= m ? oldPoint.X + m : oldPoint.X - wd : oldPoint.X; // shorthen of enlarge selection
-                var newY = reworkHeight ? hd + t * m >= m ? oldPoint.Y + m : oldPoint.Y - hd : oldPoint.Y; // shorthen of enlarge selection
-                selection.EndPixel = new Point(newX, newY); // We want a selection that is a multiple of multiple
-            }
-
-            for (int i = selection.StartPixel.X; i < selection.EndPixel.X; i += 32)
-            {
-                for (int j = selection.StartPixel.Y; j < selection.EndPixel.Y; j += 32)
+                var wd = tw % m; // Width overflow
+                if (tw > m && this.DontRespectTolerance(wd, t, m))
                 {
-                    var img = new Bitmap(m, m);
-                    var counter = 10001;
-                    using (var graphics = Graphics.FromImage(img))
-                    {
-                        graphics.DrawImage(image, new Rectangle(0, 0, m, m), new Rectangle(i, j, m, m), GraphicsUnit.Pixel);
+                    reworkWith = true;
+                }
 
-                        img.Save(Path.Combine(sliceDirectoryPath, $"AAA - {counter}.jpg"));
-                        counter += 2;
+                var hd = th % m; // Width overflow
+                if (th > m && this.DontRespectTolerance(hd, t, m))
+                {
+                    reworkHeight = true;
+                }
+
+                if (reworkWith || reworkHeight)
+                {
+                    var oldPoint = selection.EndPixel;
+                    var newX = reworkWith ? wd + t * m >= m ? oldPoint.X + m : oldPoint.X - wd : oldPoint.X; // shorthen of enlarge selection
+                    var newY = reworkHeight ? hd + t * m >= m ? oldPoint.Y + m : oldPoint.Y - hd : oldPoint.Y; // shorthen of enlarge selection
+                    selection.EndPixel = new Point(newX, newY); // We want a selection that is a multiple of multiple
+                }
+
+                for (int i = selection.StartPixel.X; i < selection.EndPixel.X; i += 32)
+                {
+                    for (int j = selection.StartPixel.Y; j < selection.EndPixel.Y; j += 32)
+                    {
+                        var img = new Bitmap(m, m);
+                        using (var graphics = Graphics.FromImage(img))
+                        {
+                            graphics.DrawImage(image, new Rectangle(0, 0, m, m), new Rectangle(i, j, m, m), GraphicsUnit.Pixel);
+
+                            img.Save(Path.Combine(sliceDirectoryPath, $"AAA - {counter}.jpg"));
+                            counter += 2;
+                        }
                     }
                 }
             }

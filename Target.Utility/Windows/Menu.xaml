@@ -8,10 +8,24 @@
              mc:Ignorable="d" 
              d:DataContext="{d:DesignInstance Type=viewModels:MenuControlViewModel}"
              d:DesignHeight="300" d:DesignWidth="300">
+    <UserControl.InputBindings>
+        <KeyBinding Command="{Binding LoadImageCommand}" 
+                    Key="L" 
+                    Modifiers="Control"/>
+
+        <KeyBinding Command="{Binding ResetTargetSelectionCommand}" 
+                    Key="R" 
+                    Modifiers="Control"/>
+
+        <KeyBinding Command="{Binding SliceCommand}" 
+                    Key="S" 
+                    Modifiers="Control"/>
+    </UserControl.InputBindings>
     <Grid>
         <Menu>
             <MenuItem Header="** File">
                 <MenuItem Header="** Load Image" Command="{Binding LoadImageCommand}"/>
+                <MenuItem Header="** Resize Batch" Command="{Binding ResizeBatchCommand}"/>
             </MenuItem>
             <MenuItem Header="** Actions">
                 <MenuItem Header="** Slice" Command="{Binding SliceCommand}"/>
