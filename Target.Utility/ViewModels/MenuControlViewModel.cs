@@ -1,6 +1,9 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.ComponentModel;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Windows.Input;
+using Microsoft.Win32;
 using Target.Utility.Annotations;
 using Target.Utility.Events;
 
@@ -12,7 +15,6 @@ namespace Target.Utility.ViewModels
         #region Fields
 
         public event PropertyChangedEventHandler PropertyChanged;
-        private string _imageSize;
 
         #endregion
 
@@ -20,15 +22,11 @@ namespace Target.Utility.ViewModels
 
         public MenuControlViewModel()
         {
-            this.LoadImageCommand = new RelayCommand(LoadImage);
+            this.LoadImageCommand = new RelayCommand(LoadImages);
             this.ResizeBatchCommand = new RelayCommand(ResizeBatch);
-            this.ViewResizedImageCommand = new RelayCommand(ViewResizedImage);
             this.Add32PxDicisionCommand = new RelayCommand(Add32PxDicision);
-            this.RestoreImageCommand = new RelayCommand(RestoreImage);
             this.ResetTargetSelectionCommand = new RelayCommand(ResetTargetSelection);
-            this.SliceCommand = new RelayCommand(Slice, CanSlice);
             this.EditSettingsCommand = new RelayCommand(EditSettings);
-            Bootstrapper.GetEventAggregator().GetEvent<ImageSizeFoundEvent>().Subscribe(ImageLoaded);
         }
 
         #endregion
@@ -36,29 +34,14 @@ namespace Target.Utility.ViewModels
         #region Properties
 
         public ICommand LoadImageCommand { get; set; }
+
         public ICommand ResizeBatchCommand { get; set; }
 
         public ICommand Add32PxDicisionCommand { get; set; }
 
         public ICommand ResetTargetSelectionCommand { get; set; }
 
-        public ICommand RestoreImageCommand { get; set; }
-
-        public ICommand SliceCommand { get; set; }
-
-        public ICommand ViewResizedImageCommand { get; set; }
-
         public ICommand EditSettingsCommand { get; set; }
-
-        public string ImageSize
-        {
-            get => _imageSize;
-            set
-            {
-                _imageSize = value;
-                OnPropertyChanged(nameof(ImageSize));
-            }
-        }
 
         #endregion
 
@@ -87,21 +70,24 @@ namespace Target.Utility.ViewModels
 
         private void ResizeBatch(object obj)
         {
-            ImageController.Instance.ResizeBatch();
+            throw new NotImplementedException();
+            //ImageController.Instance.ResizeBatch();
         }
 
-        private void Slice(object parameter)
+        private void LoadImages(object parameter)
         {
-            Bootstrapper.GetEventAggregator().GetEvent<SliceImageEvent>().Publish();
-        }
+            var fileDialog = new OpenFileDialog
+            {
+                DefaultExt = ".jpg",
+                Multiselect = true,
+                Filter = "Image files (*.jpg, *.jpeg, *.jpe, *.jfif, *.png) | *.jpg; *.jpeg; *.jpe; *.jfif; *.png"
+            };
 
-        private void LoadImage(object parameter)
-        {
-            ImageController.Instance.LoadImage();
-        }
-        private void RestoreImage(object parameter)
-        {
-            Bootstrapper.GetEventAggregator().GetEvent<RestoreImageEditionsEvent>().Publish();
+            if (fileDialog.ShowDialog() == true)
+            {
+                var files = fileDialog.FileNames.ToList();
+                Bootstrapper.GetEventAggregator().GetEvent<NewImageFilesLoadedEvent>().Publish(new NewImageFilesLoadedEvent(files));
+            }
         }
 
         private void ResetTargetSelection(object obj)
@@ -112,16 +98,6 @@ namespace Target.Utility.ViewModels
         private void Add32PxDicision(object obj)
         {
             Bootstrapper.GetEventAggregator().GetEvent<Add32PxGridEvent>().Publish();
-        }
-
-        private void ImageLoaded(ImageSizeFoundEvent obj)
-        {
-            this.ImageSize = obj.ImageSize;
-        }
-
-        private void ViewResizedImage(object obj)
-        {
-            Bootstrapper.ViewResizedImage();
         }
 
         private void EditSettings(object obj)

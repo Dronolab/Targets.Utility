@@ -22,6 +22,10 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
         
         <!--Width resizing-->
@@ -35,6 +39,7 @@
                  Margin="0,8,8,8"
                  Width="50"
                  TextAlignment="Center"
+                 HorizontalAlignment="Left"
                  Text="{Binding ResizeWidth}"/>
 
         <!--Heigh resizing-->
@@ -48,6 +53,7 @@
                  Margin="0,8,8,8"
                  Width="50"
                  TextAlignment="Center"
+                 HorizontalAlignment="Left"
                  Text="{Binding ResizeHeight}"/>
 
         <!--Multiple resizing-->
@@ -61,6 +67,7 @@
                  Margin="0,8,8,8"
                  Width="50"
                  TextAlignment="Center"
+                 HorizontalAlignment="Left"
                  Text="{Binding ResizeMultiple}"/>
 
         <!--Tolerance-->
@@ -74,25 +81,83 @@
                  Margin="0,8,8,8"
                  Width="50"
                  TextAlignment="Center"
+                 HorizontalAlignment="Left"
                  Text="{Binding Tolerance}"/>
 
-        <!--ResizeImage-->
+        <!--KeepExif-->
         <TextBlock Grid.Column="0"
                    Grid.Row="4"
                    Margin="8"
-                   ToolTip="Note that the image will be cropted based on the multiple"
-                   Text="** Resize Image*"/>
+                   Text="** Keep Exif"/>
 
         <CheckBox Grid.Column="1"
                   Grid.Row="4"
                   Margin="0,8,8,8"
-                  IsChecked="{Binding ResizeImage}"/>
+                  IsChecked="{Binding KeepExif}"/>
+
+        <!--Keep XMP-->
+        <TextBlock Grid.Column="0"
+                   Grid.Row="5"
+                   Margin="8"
+                   Text="** Keep Xmp"/>
+
+        <CheckBox Grid.Column="1"
+                  Grid.Row="5"
+                  Margin="0,8,8,8"
+                  IsChecked="{Binding KeepXmp}"/>
+
+
+        <!--Keep XMP-->
+        <TextBlock Grid.Column="0"
+                   Grid.Row="6"
+                   Margin="8"
+                   Text="** Keep Selection Between Images"/>
+
+        <CheckBox Grid.Column="1"
+                  Grid.Row="6"
+                  Margin="0,8,8,8"
+                  IsChecked="{Binding KeepSelectionBetweenImage}"/>
+
+        <!--output directory-->
+        <TextBlock Grid.Column="0"
+                   Margin="8"
+                   Grid.Row="7"
+                   Text="** Output directory"/>
+
+        <StackPanel Grid.Column="1"
+                    Grid.Row="7"
+                    Margin="0,8,8,0"
+                    Orientation="Horizontal">
+            <TextBox Width="300"
+                     TextAlignment="Center"
+                     Height="20"
+                     Text="{Binding OutputFolderPath}"/>
+
+            <Button Content="Choose"
+                    Margin="8,0,0,0"
+                    Command="{Binding ChooseOutputFolderPathCommand}"/>
+        </StackPanel>
+
+        <!--output directory-->
+        <TextBlock Grid.Column="0"
+                   Margin="8"
+                   Grid.Row="8"
+                   Text="** Target slice image prefix"/>
+
+        <TextBox Grid.Column="1"
+                 Grid.Row="8"
+                 Margin="0,8,8,8"
+                 Width="100"
+                 TextAlignment="Center"
+                 HorizontalAlignment="Left"
+                 Text="{Binding TargetSliceImagePrefix}"/>
         
         <Button Grid.Column="0"
-                Grid.Row="5"
+                Grid.Row="9"
                 Grid.ColumnSpan="2"
                 Content="** Save"
                 Margin="8"
+                Padding="8"
                 Command="{Binding SaveSettingsCommand}"/>
     </Grid>
 </Window>

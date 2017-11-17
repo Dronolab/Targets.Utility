@@ -43,28 +43,6 @@ namespace Target.Utility
             return _eventAggregator;
         }
 
-        public static void ViewResizedImage()
-        {
-            var img = ImageController.Instance.ResizeImage(Settings.Default.ResizeWidth, Settings.Default.ResizeHeight);
-            var bitmapImage = new BitmapImage();
-
-            using (var ms = new MemoryStream())
-            {
-                img.Save(ms, ImageFormat.Bmp);
-                ms.Seek(0, SeekOrigin.Begin);
-
-                bitmapImage.BeginInit();
-                bitmapImage.CacheOption = BitmapCacheOption.OnLoad;
-                bitmapImage.StreamSource = ms;
-                bitmapImage.EndInit();
-            }
-
-            var viewModel = new ViewResizedImageWindowViewModel(bitmapImage);
-            var window = new ViewResizedImageWindow(viewModel);
-
-            window.Show();
-        }
-
         public static void ShowEditSettingsView()
         {
 

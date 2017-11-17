@@ -73,13 +73,61 @@ namespace Target.Utility.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("True")]
-        public bool ResizeImage {
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool KeepXmp {
             get {
-                return ((bool)(this["ResizeImage"]));
+                return ((bool)(this["KeepXmp"]));
             }
             set {
-                this["ResizeImage"] = value;
+                this["KeepXmp"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool KeepExif {
+            get {
+                return ((bool)(this["KeepExif"]));
+            }
+            set {
+                this["KeepExif"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("C:\\")]
+        public string OutputFolderPath {
+            get {
+                return ((string)(this["OutputFolderPath"]));
+            }
+            set {
+                this["OutputFolderPath"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("000 - ")]
+        public string TargetSliceImagePrefix {
+            get {
+                return ((string)(this["TargetSliceImagePrefix"]));
+            }
+            set {
+                this["TargetSliceImagePrefix"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool KeepSelectionBetweenImage {
+            get {
+                return ((bool)(this["KeepSelectionBetweenImage"]));
+            }
+            set {
+                this["KeepSelectionBetweenImage"] = value;
             }
         }
     }

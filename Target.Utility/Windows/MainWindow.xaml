@@ -5,22 +5,42 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local1="clr-namespace:Target.Utility.Windows"
         xmlns:viewModels="clr-namespace:Target.Utility.ViewModels"
+        xmlns:properties="clr-namespace:Target.Utility.Properties"
         mc:Ignorable="d"
         d:DataContext="{d:DesignInstance Type=viewModels:SplitImagViewViewModel}"
         MouseMove="MainWindow_OnMouseMove"
-        Title="Si j'ai un pouce de plus ma blonde sera contente en criss - Jay" Height="900" Width="1600">
+        Title="AI Helper" 
+        SizeToContent="WidthAndHeight">
+    <Window.InputBindings>
+        <KeyBinding Modifiers="Control"
+                    Key="S"
+                    Command="{Binding SliceCommand}"/>
+        <KeyBinding Modifiers="Control"
+                    Key="Z"
+                    Command="{Binding RemoveLastSelectionCommand}"/>
+    </Window.InputBindings>
     <DockPanel>
-        <local1:Menu DockPanel.Dock="Top" />
+        <Grid DockPanel.Dock="Top">
+            <local1:Menu  />
+
+            <TextBlock VerticalAlignment="Top"
+                       HorizontalAlignment="Right"
+                       Margin="0,0,8,0"
+                       Text="{Binding ProgressMessage}"/>
+        </Grid>
 
         <Canvas x:Name="Canvas"
-                ClipToBounds="True"
-                AllowDrop="True"
+                ClipToBounds="true"
+                AllowDrop="False"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Top"
+                Width="{Binding Source={x:Static properties:Settings.Default}, Path=ResizeWidth}"
+                Height="{Binding Source={x:Static properties:Settings.Default}, Path=ResizeHeight}"
                 MouseLeftButtonDown="Canvas_OnMouseLeftButtonDown"
-                MouseLeftButtonUp="Canvas_OnMouseLeftButtonUp"
                 MouseMove="Canvas_OnMouseMove"
                 Drop="UIElement_OnDrop">
             <Image x:Name="Image"
-                   Source="{Binding ImageSource}"
+                   Source="{Binding DisplayedImage}"
                    Height="{Binding ImageHeight}"
                    Width="{Binding ImageWidth}"
                    MouseLeftButtonDown="Image_OnMouseLeftButtonDown"
@@ -28,13 +48,13 @@
                    PreviewMouseRightButtonDown="Image_OnPreviewMouseRightButtonDown"
                    MouseMove="Image_OnMouseMove"
                    MouseWheel="Image_OnMouseWheel"/>
-            <!--<Line x:Name="HorizontalLine" Stroke="Black"/>
-            <Line x:Name="VerticalLine" Stroke="Black"/>
             <Rectangle x:Name="PreviewSelectionRectangle" 
-                       Canvas.Top="50"
-                       Canvas.Left="50"
+                       Canvas.Top="-32"
+                       Canvas.Left="-32"
+                       Width="{Binding Source={x:Static properties:Settings.Default}, Path=ResizeMultiple}"
+                       Height="{Binding Source={x:Static properties:Settings.Default}, Path=ResizeMultiple}"
                        StrokeThickness="1"
-                       Stroke="Black"/>-->
+                       Stroke="Red"/>
         </Canvas>
     </DockPanel>
 </Window>

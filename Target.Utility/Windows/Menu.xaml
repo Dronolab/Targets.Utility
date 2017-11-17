@@ -8,19 +8,6 @@
              mc:Ignorable="d" 
              d:DataContext="{d:DesignInstance Type=viewModels:MenuControlViewModel}"
              d:DesignHeight="300" d:DesignWidth="300">
-    <UserControl.InputBindings>
-        <KeyBinding Command="{Binding LoadImageCommand}" 
-                    Key="L" 
-                    Modifiers="Control"/>
-
-        <KeyBinding Command="{Binding ResetTargetSelectionCommand}" 
-                    Key="R" 
-                    Modifiers="Control"/>
-
-        <KeyBinding Command="{Binding SliceCommand}" 
-                    Key="S" 
-                    Modifiers="Control"/>
-    </UserControl.InputBindings>
     <Grid>
         <Menu>
             <MenuItem Header="** File">
@@ -28,19 +15,10 @@
                 <MenuItem Header="** Resize Batch" Command="{Binding ResizeBatchCommand}"/>
             </MenuItem>
             <MenuItem Header="** Actions">
-                <MenuItem Header="** Slice" Command="{Binding SliceCommand}"/>
-                <MenuItem Header="** View Resized Image" Command="{Binding ViewResizedImageCommand}"/>
-                <MenuItem Header="** Restore Default Size" Command="{Binding RestoreImageCommand}"/>
                 <MenuItem Header="** Reset target selection" Command="{Binding ResetTargetSelectionCommand}"/>
                 <MenuItem Header="** Add 32 pixels divisions" Command="{Binding Add32PxDicisionCommand}"/>
             </MenuItem>
-            <MenuItem Header="** Settings">
-                <MenuItem Header="** Image Settings" Command="{Binding EditSettingsCommand}"/>
-                <MenuItem Header="** Application Settings"/>
-            </MenuItem>
+            <MenuItem Header="** Settings" Command="{Binding EditSettingsCommand}" />
         </Menu>
-        <TextBlock HorizontalAlignment="Right"
-                   Margin="8,0"
-                   Text="{Binding ImageSize}"/>
     </Grid>
 </UserControl>

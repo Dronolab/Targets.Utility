@@ -104,9 +104,10 @@
     <Compile Include="Events\Add32PxGridEvent.cs" />
     <Compile Include="Bootstrapper.cs" />
     <Compile Include="ImageController.cs" />
-    <Compile Include="Events\ImageSizeFoundEvent.cs" />
+    <Compile Include="Models\ImageModel.cs" />
     <Compile Include="TargetSelectionRegion.cs" />
     <Compile Include="ViewModels\EditSettingsWindowViewModel.cs" />
+    <Compile Include="ViewModels\WorkerReportViewModel.cs" />
     <Compile Include="Windows\EditSettingsWindow.xaml.cs">
       <DependentUpon>EditSettingsWindow.xaml</DependentUpon>
     </Compile>
@@ -115,17 +116,11 @@
       <DependentUpon>Menu.xaml</DependentUpon>
     </Compile>
     <Compile Include="ViewModels\MenuControlViewModel.cs" />
-    <Compile Include="Events\NewImageLoadedEvent.cs" />
+    <Compile Include="Events\NewImageFilesLoadedEvent.cs" />
     <Compile Include="Properties\Annotations.cs" />
     <Compile Include="RelayCommand.cs" />
     <Compile Include="Events\ResetTargetSelectionEvent.cs" />
-    <Compile Include="Events\RestoreImageEditionsEvent.cs" />
-    <Compile Include="Events\SliceImageEvent.cs" />
     <Compile Include="ViewModels\SplitImagViewViewModel.cs" />
-    <Compile Include="Windows\ViewResizedImageWindow.xaml.cs">
-      <DependentUpon>ViewResizedImageWindow.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="ViewModels\ViewResizedImageWindowViewModel.cs" />
     <Page Include="Windows\EditSettingsWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -143,10 +138,6 @@
       <SubType>Code</SubType>
     </Compile>
     <Page Include="Windows\Menu.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Windows\ViewResizedImageWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

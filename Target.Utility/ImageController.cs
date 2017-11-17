@@ -6,10 +6,7 @@ using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using System.Windows;
-using System.Windows.Documents;
-using System.Windows.Media.Imaging;
 using Microsoft.Win32;
-using Target.Utility.Events;
 using Target.Utility.Properties;
 using Point = System.Drawing.Point;
 
@@ -20,36 +17,25 @@ namespace Target.Utility
 
         #region Fields
 
-        private static ImageController _instance;
-        private string _imageFilePath;
-        private static readonly object Padlock = new object();
-
-        // Applicable settings. We have a settings class, but sometime we don't want to use them
-        private int _applicableMultiple = -1;
-        private double _applicableTolerance = -1;
+        private readonly List<TargetSelectionRegion> _selections;
+        private readonly Image _img;
 
         #endregion
 
         #region Constructors
 
-        private ImageController()
+        public ImageController(Image img, List<TargetSelectionRegion> selections, string imgName)
         {
+            this._selections = selections;
+            this._img = img;
+            this.ImageFileName = imgName;
         }
 
         #endregion
 
         #region Properties
 
-        public static ImageController Instance
-        {
-            get
-            {
-                lock (Padlock)
-                {
-                    return _instance ?? (_instance = new ImageController());
-                }
-            }
-        }
+        public string ImageFileName { get; }
 
         #endregion
 
@@ -57,59 +43,24 @@ namespace Target.Utility
 
         #region Public
 
-        public void LoadImage()
+        public static Image ResizeImage(Image img)
         {
-            var dlg = new OpenFileDialog
-            {
-                DefaultExt = ".jpg",
-                Filter = "Image files (*.jpg, *.jpeg, *.jpe, *.jfif, *.png) | *.jpg; *.jpeg; *.jpe; *.jfif; *.png"
-            };
-
-            var result = dlg.ShowDialog();
-
-            if (result == true)
-            {
-                var filePath = dlg.FileName;
-                Bootstrapper.GetEventAggregator().GetEvent<NewImageLoadedEvent>().Publish(new NewImageLoadedEvent(filePath));
-                this._imageFilePath = filePath;
-            }
-        }
-
-        public void ResizeBatch()
-        {
-            var dlg = new OpenFileDialog
-            {
-                DefaultExt = ".jpg",
-                Multiselect = true,
-                Filter = "Image files (*.jpg, *.jpeg, *.jpe, *.jfif, *.png) | *.jpg; *.jpeg; *.jpe; *.jfif; *.png"
-            };
-
-            var result = dlg.ShowDialog();
-
-            if (result == true)
-            {
-                var files = dlg.FileNames.ToList();
-
-                var desktopPath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
-                var resizedPath = Path.Combine(desktopPath, $"{DateTime.Now:yyyy-MM-dd HH-mm-ss} - Resized");
-                Directory.CreateDirectory(resizedPath);
-
-                var counter = 0;
-                foreach (var filePath in files)
-                {
-                    ResizeImageDep(Settings.Default.ResizeWidth, Settings.Default.ResizeHeight, filePath, Path.Combine(resizedPath, $"{counter++}.jpg"));
-                }
-
-                MessageBox.Show("Done");
-            }
-        }
-
-        private void ResizeImageDep(int width, int height, string imagePath, string fileName)
-        {
-            var imageToResize = Image.FromFile(imagePath);
-
+            var width = Settings.Default.ResizeWidth;
+            var height = Settings.Default.ResizeHeight;
             var destRect = new Rectangle(0, 0, width, height);
             var destImage = new Bitmap(width, height);
+
+            // todo validate that the xmp and exif are copied
+            if (Settings.Default.KeepExif && Settings.Default.KeepXmp)
+            {
+                foreach (var propItem in img.PropertyItems)
+                {
+                    destImage.SetPropertyItem(propItem);
+                }
+            }
+
+            // todo is this usefull?
+            destImage.SetResolution(img.HorizontalResolution, img.VerticalResolution);
 
             using (var graphics = Graphics.FromImage(destImage))
             {
@@ -122,229 +73,50 @@ namespace Target.Utility
                 using (var wrapMode = new ImageAttributes())
                 {
                     wrapMode.SetWrapMode(WrapMode.TileFlipXY);
-                    graphics.DrawImage(imageToResize, destRect, 0, 0, imageToResize.Width, imageToResize.Height, GraphicsUnit.Pixel, wrapMode);
-
-                    destImage.Save(fileName);
-                    wrapMode.Dispose();
-                }
-                graphics.Dispose();
-            }
-            imageToResize.Dispose();
-            destImage.Dispose();
-        }
-
-        public void LoadImage(string filePath)
-        {
-            if (filePath != null)
-            {
-                Bootstrapper.GetEventAggregator().GetEvent<NewImageLoadedEvent>().Publish(new NewImageLoadedEvent(filePath));
-                this._imageFilePath = filePath;
-            }
-        }
-
-        public Image ResizeImage(int width, int height)
-        {
-            var imageToResize = Image.FromFile(this._imageFilePath);
-
-            var destRect = new Rectangle(0, 0, width, height);
-            var destImage = new Bitmap(width, height);
-
-            foreach (var propItem in imageToResize.PropertyItems)
-            {
-                destImage.SetPropertyItem(propItem);
-            }
-
-            destImage.SetResolution(imageToResize.HorizontalResolution, imageToResize.VerticalResolution);
-
-            using (var graphics = Graphics.FromImage(destImage))
-            {
-                graphics.CompositingMode = CompositingMode.SourceCopy;
-                graphics.CompositingQuality = CompositingQuality.HighQuality;
-                graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
-                graphics.SmoothingMode = SmoothingMode.HighQuality;
-                graphics.PixelOffsetMode = PixelOffsetMode.HighQuality;
-
-                using (var wrapMode = new ImageAttributes())
-                {
-                    wrapMode.SetWrapMode(WrapMode.TileFlipXY);
-                    graphics.DrawImage(imageToResize, destRect, 0, 0, imageToResize.Width, imageToResize.Height, GraphicsUnit.Pixel, wrapMode);
+                    graphics.DrawImage(img, destRect, 0, 0, img.Width, img.Height, GraphicsUnit.Pixel, wrapMode);
                 }
             }
 
             return destImage;
         }
 
-        public void SliceImage(List<TargetSelectionRegion> selections)
+        /// <summary>
+        /// Starts slicing the image.
+        /// </summary>
+        /// <returns></returns>
+        public bool StartSlicing()
         {
-            this._applicableMultiple = Settings.Default.ResizeMultiple;
-            this._applicableTolerance = Settings.Default.Tolerance;
-
-            Image resizedImage = null;
-            if (Settings.Default.ResizeImage)
-            {
-                resizedImage = this.ResizeImage(Settings.Default.ResizeWidth, Settings.Default.ResizeHeight);
-                this.ResizeSelection(ref selections);
-            }
-            else
-            {
-                var m = Settings.Default.ResizeMultiple;
-                var imageToResize = Image.FromFile(this._imageFilePath);
-                resizedImage = this.ResizeImage((imageToResize.Width / m) * m, (imageToResize.Height / m) * m);
-                this.ResizeSelection(ref selections);
-            }
-            //this.FlatternSelection(ref selection);
-
-            var desktopPath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
-            var slicesPath = Path.Combine(desktopPath, $"{DateTime.Now:yyyy-MM-dd HH-mm-ss} - slices");
-            Directory.CreateDirectory(slicesPath);
-
-            // Start slicing
-            this.CreateMiniatures(resizedImage, slicesPath, selections); // needs the user selection
+            this.SliceImage();
+            this._img.Dispose();
+            return true;
         }
 
-        #endregion
-
-        #region Protected
         #endregion
 
         #region Private
 
-        private void ResizeSelection(ref List<TargetSelectionRegion> selections)
+        /// <summary>
+        /// Slices the image into pieces of m*m where m is the settings ResizeMultiple
+        /// </summary>
+        private void SliceImage()
         {
-            // First we need to check how much the main image has been resized
-            var imageToResize = Image.FromFile(this._imageFilePath);
+            var outputPath = Settings.Default.OutputFolderPath;
+            var slicesPath = Path.Combine(outputPath, $"{this.ImageFileName} - {DateTime.Now:yyyy-MM-dd HH-mm-ss} - slices");
+            Directory.CreateDirectory(slicesPath);
 
-            var width = Settings.Default.ResizeWidth;
-            var height = Settings.Default.ResizeHeight;
-
-            var widthProp = width / (double)imageToResize.Width;
-            var heightProp = height / (double)imageToResize.Height;
-
-            foreach (var selection in selections)
-            {
-                var startX = selection.StartPixel.X;
-                var startY = selection.StartPixel.Y;
-                var endX = selection.EndPixel.X;
-                var endY = selection.EndPixel.Y;
-
-                var newStartX = Math.Round(startX * widthProp);
-                var newStartY = Math.Round(startY * heightProp);
-                var newEndX = Math.Round(endX * widthProp);
-                var newEndY = Math.Round(endY * heightProp);
-
-                selection.StartPixel = new Point(Convert.ToInt32(newStartX), Convert.ToInt32(newStartY));
-                selection.EndPixel = new Point(Convert.ToInt32(newEndX), Convert.ToInt32(newEndY));
-            }
+            // Start slicing
+            this.CreateMiniatures(slicesPath); // needs the user selection
         }
 
         /// <summary>
-        /// Deprecated
+        /// Creates the miniatures.
         /// </summary>
-        /// <param name="selection"></param>
-        /// <param name="tolerance"></param>
-        /// <param name="multiple"></param>
-        private void FlattenrStartPoint(ref TargetSelectionRegion selection, double tolerance, double multiple)
-        {
-            var distanteStartX = selection.StartPixel.X % multiple;
-            var distanteStartY = selection.StartPixel.Y % multiple;
-
-            var moveX = false;
-            var moveY = false;
-
-            if (DontRespectTolerance(distanteStartX, tolerance, multiple))
-            {
-                moveX = true;
-            }
-            if (DontRespectTolerance(distanteStartY, tolerance, multiple))
-            {
-                moveY = true;
-            }
-
-            if (moveX || moveY)
-            {
-                var newX = moveX ? selection.StartPixel.X - (distanteStartX <= tolerance ? distanteStartX : -(multiple - tolerance)) : selection.StartPixel.X;
-                var newY = moveY ? selection.StartPixel.Y - (distanteStartY <= tolerance ? distanteStartY : -(multiple - tolerance)) : selection.StartPixel.Y;
-                selection.StartPixel = new Point((int)newX, (int)newY);
-            }
-        }
-
-        /// <summary>
-        /// Deprecated
-        /// </summary>
-        /// <param name="selection"></param>
-        /// <param name="tolerance"></param>
-        /// <param name="multiple"></param>
-        private void FlatternEndPoint(ref TargetSelectionRegion selection, double tolerance, double multiple)
-        {
-            var targetWidth = selection.EndPixel.X - selection.StartPixel.X;
-            var targetHeight = selection.EndPixel.Y - selection.StartPixel.Y;
-
-            var removeXOverflow = false;
-            var removeYOverflow = false;
-
-            var overflowWidthTargetMultiple = targetWidth % multiple;
-            if (DontRespectTolerance(overflowWidthTargetMultiple, tolerance, multiple))
-            {
-                removeXOverflow = true;
-            }
-            var overflowHeightTargetMultiple = targetHeight % multiple;
-            if (DontRespectTolerance(overflowHeightTargetMultiple, tolerance, multiple))// not good, this is a range, not a check todo
-            {
-                removeYOverflow = true;
-            }
-
-            if (removeXOverflow || removeYOverflow)
-            {
-                var oldEnd = selection.EndPixel;
-                var newX = removeXOverflow ? oldEnd.X - (overflowWidthTargetMultiple <= tolerance ? overflowWidthTargetMultiple : -(multiple - tolerance)) : oldEnd.X;
-                var newY = removeYOverflow ? oldEnd.Y - (overflowHeightTargetMultiple <= tolerance ? overflowHeightTargetMultiple : -(multiple - tolerance)) : oldEnd.Y;
-                selection.EndPixel = new Point((int)newX, (int)newY);
-            }
-        }
-
-        /// <summary>
-        /// Deprecated
-        /// </summary>
-        /// <param name="selection"></param>
-        private void FlatternSelection(ref TargetSelectionRegion selection)
+        /// <param name="sliceDirectoryPath">The slice directory path.</param>
+        private void CreateMiniatures(string sliceDirectoryPath)
         {
             var multiple = Settings.Default.ResizeMultiple;
-            var tolerance = multiple * Settings.Default.Tolerance; // todo settings
-
-            // Firstly, we are checking the first point. we want something that start near of a multiple of the settings
-            this.FlattenrStartPoint(ref selection, tolerance, multiple);
-
-            // Sencondly, checking the distance of the target. If we want something near a multiple of the settings
-            this.FlatternEndPoint(ref selection, tolerance, multiple);
-
-            // Finnaly, we must check if the selection has width or height >= multiple (otherwise there is no selection)
-            // todo
-        }
-
-        /// <summary>
-        /// Deprecated
-        /// </summary>
-        /// <param name="distance"></param>
-        /// <param name="tolerance"></param>
-        /// <param name="multiple"></param>
-        /// <returns></returns>
-        private bool DontRespectTolerance(double distance, double tolerance, double multiple)
-        {
-            return distance <= multiple * tolerance || distance >= multiple - multiple * tolerance;
-        }
-
-        private void CreateMiniatures(Image image, string sliceDirectoryPath, List<TargetSelectionRegion> selections)
-        {
-            var multiple = this._applicableMultiple;
-
             var width = Settings.Default.ResizeWidth;
             var height = Settings.Default.ResizeHeight;
-
-            if (!Settings.Default.ResizeImage)
-            {
-                width = image.Width / multiple * multiple;
-                height = image.Height / multiple * multiple;
-            }
 
             var counter = 0;
             for (int i = 0; i < width / multiple; i++)
@@ -354,10 +126,10 @@ namespace Target.Utility
                     var img = new Bitmap(multiple, multiple);
                     using (var graphics = Graphics.FromImage(img))
                     {
-                        graphics.DrawImage(image, new Rectangle(0, 0, multiple, multiple), new Rectangle(i * multiple, j * multiple, multiple, multiple), GraphicsUnit.Pixel);
+                        graphics.DrawImage(this._img, new Rectangle(0, 0, multiple, multiple), new Rectangle(i * multiple, j * multiple, multiple, multiple), GraphicsUnit.Pixel);
 
                         var hasTarget = false;
-                        foreach (var selection in selections)
+                        foreach (var selection in this._selections)
                         {
                             if (IsInRange(i * multiple, j * multiple, selection))
                             {
@@ -386,17 +158,23 @@ namespace Target.Utility
                 }
             }
 
-            this.CreateMiniatureOfTarget(image, sliceDirectoryPath, selections);
+            // After the slices are done like a grid, we probably sliced a target in 1-2 images (32*32). 
+            // We'll make custom slice that should contains the entire target
+            this.CreateMiniatureOfTarget(sliceDirectoryPath);
         }
 
-        private void CreateMiniatureOfTarget(Image image, string sliceDirectoryPath, List<TargetSelectionRegion> selections)
+        /// <summary>
+        /// Creates the miniature of target.
+        /// </summary>
+        /// <param name="sliceDirectoryPath">The slice directory path.</param>
+        private void CreateMiniatureOfTarget(string sliceDirectoryPath)
         {
             // Settings
-            var t = this._applicableTolerance;
-            var m = this._applicableMultiple;
+            var t = Settings.Default.Tolerance;
+            var m = Settings.Default.ResizeMultiple;
             var counter = 10001;
 
-            foreach (var selection in selections)
+            foreach (var selection in this._selections)
             {
                 var tw = selection.EndPixel.X - selection.StartPixel.X; // target width
                 var th = selection.EndPixel.Y - selection.StartPixel.Y; // target height
@@ -432,9 +210,9 @@ namespace Target.Utility
                         var img = new Bitmap(m, m);
                         using (var graphics = Graphics.FromImage(img))
                         {
-                            graphics.DrawImage(image, new Rectangle(0, 0, m, m), new Rectangle(i, j, m, m), GraphicsUnit.Pixel);
+                            graphics.DrawImage(this._img, new Rectangle(0, 0, m, m), new Rectangle(i, j, m, m), GraphicsUnit.Pixel);
 
-                            img.Save(Path.Combine(sliceDirectoryPath, $"AAA - {counter}.jpg"));
+                            img.Save(Path.Combine(sliceDirectoryPath, $"{Settings.Default.TargetSliceImagePrefix}{counter}.jpg"));
                             counter += 2;
                         }
                     }
@@ -442,6 +220,15 @@ namespace Target.Utility
             }
         }
 
+        /// <summary>
+        /// Determines if the current selection is in the range of the current image slice
+        /// </summary>
+        /// <param name="i">The i.</param>
+        /// <param name="j">The j.</param>
+        /// <param name="selection">The selection.</param>
+        /// <returns>
+        ///   <c>true</c> if the selection is in the slice; otherwise, <c>false</c>.
+        /// </returns>
         private bool IsInRange(int i, int j, TargetSelectionRegion selection)
         {
             var sx = selection.StartPixel.X;
@@ -450,7 +237,7 @@ namespace Target.Utility
             var ey = selection.EndPixel.Y;
 
             //settings
-            var m = this._applicableMultiple;
+            var m = Settings.Default.ResizeMultiple;
 
             //            [Check if start is there]   [check if end is there]
             var inRange = sx >= i && sx < i + m || ex > i && ex < i + 32;
@@ -464,7 +251,91 @@ namespace Target.Utility
             return inRange;
         }
 
+        /// <summary>
+        /// Deprecated
+        /// </summary>
+        /// <param name="distance"></param>
+        /// <param name="tolerance"></param>
+        /// <param name="multiple"></param>
+        /// <returns></returns>
+        private bool DontRespectTolerance(double distance, double tolerance, double multiple)
+        {
+            return distance <= multiple * tolerance || distance >= multiple - multiple * tolerance;
+        }
+
         #endregion
+
+        #endregion
+
+        #region NeedsRefactoring
+
+        /// <summary>
+        /// Refactor this!!
+        /// </summary>
+        public static void ResizeBatch()
+        {
+            var dlg = new OpenFileDialog
+            {
+                DefaultExt = ".jpg",
+                Multiselect = true,
+                Filter = "Image files (*.jpg, *.jpeg, *.jpe, *.jfif, *.png) | *.jpg; *.jpeg; *.jpe; *.jfif; *.png"
+            };
+
+            var result = dlg.ShowDialog();
+
+            if (result == true)
+            {
+                var files = dlg.FileNames.ToList();
+
+                var desktopPath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+                var resizedPath = Path.Combine(desktopPath, $"{DateTime.Now:yyyy-MM-dd HH-mm-ss} - Resized");
+                Directory.CreateDirectory(resizedPath);
+
+                var counter = 0;
+                foreach (var filePath in files)
+                {
+                    ResizeImageDep(Settings.Default.ResizeWidth, Settings.Default.ResizeHeight, filePath, Path.Combine(resizedPath, $"{counter++}.jpg"));
+                }
+
+                MessageBox.Show("Done");
+            }
+        }
+
+        /// <summary>
+        /// refactor this
+        /// </summary>
+        /// <param name="width">The width.</param>
+        /// <param name="height">The height.</param>
+        /// <param name="imagePath">The image path.</param>
+        /// <param name="fileName">Name of the file.</param>
+        private static void ResizeImageDep(int width, int height, string imagePath, string fileName)
+        {
+            var imageToResize = Image.FromFile(imagePath);
+
+            var destRect = new Rectangle(0, 0, width, height);
+            var destImage = new Bitmap(width, height);
+
+            using (var graphics = Graphics.FromImage(destImage))
+            {
+                graphics.CompositingMode = CompositingMode.SourceCopy;
+                graphics.CompositingQuality = CompositingQuality.HighQuality;
+                graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
+                graphics.SmoothingMode = SmoothingMode.HighQuality;
+                graphics.PixelOffsetMode = PixelOffsetMode.HighQuality;
+
+                using (var wrapMode = new ImageAttributes())
+                {
+                    wrapMode.SetWrapMode(WrapMode.TileFlipXY);
+                    graphics.DrawImage(imageToResize, destRect, 0, 0, imageToResize.Width, imageToResize.Height, GraphicsUnit.Pixel, wrapMode);
+
+                    destImage.Save(fileName);
+                    wrapMode.Dispose();
+                }
+                graphics.Dispose();
+            }
+            imageToResize.Dispose();
+            destImage.Dispose();
+        }
 
         #endregion
 

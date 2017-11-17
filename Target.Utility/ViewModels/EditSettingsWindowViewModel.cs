@@ -1,15 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.Specialized;
-using System.ComponentModel;
-using System.Linq;
+﻿using System.ComponentModel;
 using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
+using System.Windows.Forms;
 using System.Windows.Input;
 using Target.Utility.Annotations;
 using Target.Utility.Properties;
+using MessageBox = System.Windows.MessageBox;
 
 namespace Target.Utility.ViewModels
 {
@@ -27,6 +22,7 @@ namespace Target.Utility.ViewModels
         public EditSettingsWindowViewModel()
         {
             this.SaveSettingsCommand = new RelayCommand(SaveSettings);
+            this.ChooseOutputFolderPathCommand = new RelayCommand(ChooseOutputFolderPath);
         }
 
         #endregion
@@ -35,7 +31,7 @@ namespace Target.Utility.ViewModels
 
         public int ResizeWidth
         {
-            get { return Settings.Default.ResizeWidth; }
+            get => Settings.Default.ResizeWidth;
             set
             {
                 Settings.Default.ResizeWidth = value;
@@ -45,7 +41,7 @@ namespace Target.Utility.ViewModels
 
         public int ResizeHeight
         {
-            get { return Settings.Default.ResizeHeight; }
+            get => Settings.Default.ResizeHeight;
             set
             {
                 Settings.Default.ResizeHeight = value;
@@ -56,7 +52,7 @@ namespace Target.Utility.ViewModels
 
         public int ResizeMultiple
         {
-            get { return Settings.Default.ResizeMultiple; }
+            get => Settings.Default.ResizeMultiple;
             set
             {
                 Settings.Default.ResizeMultiple = value;
@@ -66,7 +62,7 @@ namespace Target.Utility.ViewModels
 
         public double Tolerance
         {
-            get { return Settings.Default.Tolerance; }
+            get => Settings.Default.Tolerance;
             set
             {
                 Settings.Default.Tolerance = value;
@@ -74,24 +70,63 @@ namespace Target.Utility.ViewModels
             }
         }
 
-        public bool ResizeImage
+        public bool KeepExif
         {
-            get { return Settings.Default.ResizeImage; }
+            get => Settings.Default.KeepExif;
             set
             {
-                Settings.Default.ResizeImage = value;
-                OnPropertyChanged(nameof(ResizeImage));
+                Settings.Default.KeepExif = value;
+                OnPropertyChanged(nameof(KeepExif));
+            }
+        }
+
+        public bool KeepSelectionBetweenImage
+        {
+            get => Settings.Default.KeepSelectionBetweenImage;
+            set
+            {
+                Settings.Default.KeepSelectionBetweenImage = value;
+                OnPropertyChanged(nameof(KeepSelectionBetweenImage));
+            }
+        }
+
+        public bool KeepXmp
+        {
+            get => Settings.Default.KeepXmp;
+            set
+            {
+                Settings.Default.KeepXmp = value;
+                OnPropertyChanged(nameof(KeepXmp));
+            }
+        }
+
+        public string OutputFolderPath
+        {
+            get => Settings.Default.OutputFolderPath;
+            set
+            {
+                Settings.Default.OutputFolderPath = value;
+                OnPropertyChanged(nameof(OutputFolderPath));
+            }
+        }
+
+        public string TargetSliceImagePrefix
+        {
+            get => Settings.Default.TargetSliceImagePrefix;
+            set
+            {
+                Settings.Default.TargetSliceImagePrefix = value;
+                OnPropertyChanged(nameof(TargetSliceImagePrefix));
             }
         }
 
         public ICommand SaveSettingsCommand { get; set; }
 
+        public ICommand ChooseOutputFolderPathCommand { get; set; }
+
         #endregion
 
         #region Methods
-
-        #region Public
-        #endregion
 
         #region Protected
 
@@ -109,6 +144,15 @@ namespace Target.Utility.ViewModels
         {
             Settings.Default.Save();
             MessageBox.Show("Settings saved");
+        }
+
+        private void ChooseOutputFolderPath(object obj)
+        {
+            var fbd = new FolderBrowserDialog();
+            if (fbd.ShowDialog() == DialogResult.OK)
+            {
+                this.OutputFolderPath = fbd.SelectedPath;
+            }
         }
 
         #endregion
