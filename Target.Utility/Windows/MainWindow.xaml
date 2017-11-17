@@ -10,7 +10,8 @@
         d:DataContext="{d:DesignInstance Type=viewModels:SplitImagViewViewModel}"
         MouseMove="MainWindow_OnMouseMove"
         Title="AI Helper" 
-        SizeToContent="WidthAndHeight">
+        SizeToContent="WidthAndHeight"
+        ContentRendered="MainWindow_OnContentRendered">
     <Window.InputBindings>
         <KeyBinding Modifiers="Control"
                     Key="S"
@@ -18,15 +19,21 @@
         <KeyBinding Modifiers="Control"
                     Key="Z"
                     Command="{Binding RemoveLastSelectionCommand}"/>
+        <KeyBinding Modifiers="Control"
+                    Key="X"
+                    Command="{Binding RemoveSelectionsCommand}"/>
     </Window.InputBindings>
     <DockPanel>
         <Grid DockPanel.Dock="Top">
             <local1:Menu  />
+            <StackPanel Orientation="Horizontal" 
+                        VerticalAlignment="Top"
+                        HorizontalAlignment="Right"
+                        Margin="0,0,8,0">
 
-            <TextBlock VerticalAlignment="Top"
-                       HorizontalAlignment="Right"
-                       Margin="0,0,8,0"
-                       Text="{Binding ProgressMessage}"/>
+                <TextBlock Text="{Binding User.RealName}" Margin="0,0,8,0"/>
+                <TextBlock Text="{Binding ProgressMessage}"/>
+            </StackPanel>
         </Grid>
 
         <Canvas x:Name="Canvas"
@@ -36,7 +43,6 @@
                 VerticalAlignment="Top"
                 Width="{Binding Source={x:Static properties:Settings.Default}, Path=ResizeWidth}"
                 Height="{Binding Source={x:Static properties:Settings.Default}, Path=ResizeHeight}"
-                MouseLeftButtonDown="Canvas_OnMouseLeftButtonDown"
                 MouseMove="Canvas_OnMouseMove"
                 Drop="UIElement_OnDrop">
             <Image x:Name="Image"
@@ -45,14 +51,13 @@
                    Width="{Binding ImageWidth}"
                    MouseLeftButtonDown="Image_OnMouseLeftButtonDown"
                    MouseLeftButtonUp="Image_OnMouseLeftButtonUp"
-                   PreviewMouseRightButtonDown="Image_OnPreviewMouseRightButtonDown"
                    MouseMove="Image_OnMouseMove"
                    MouseWheel="Image_OnMouseWheel"/>
             <Rectangle x:Name="PreviewSelectionRectangle" 
                        Canvas.Top="-32"
                        Canvas.Left="-32"
-                       Width="{Binding Source={x:Static properties:Settings.Default}, Path=ResizeMultiple}"
-                       Height="{Binding Source={x:Static properties:Settings.Default}, Path=ResizeMultiple}"
+                       Width="{Binding SelectionSquaredSize}"
+                       Height="{Binding SelectionSquaredSize}"
                        StrokeThickness="1"
                        Stroke="Red"/>
         </Canvas>

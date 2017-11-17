@@ -118,7 +118,6 @@ namespace Target.Utility
             var width = Settings.Default.ResizeWidth;
             var height = Settings.Default.ResizeHeight;
 
-            var counter = 0;
             for (int i = 0; i < width / multiple; i++)
             {
                 for (int j = 0; j < height / multiple; j++)
@@ -137,23 +136,8 @@ namespace Target.Utility
                             }
                         }
 
-                        // S'il y a une target, on veut le counter à un nombre impair
-                        if (hasTarget)
-                        {
-                            counter++;
-                        }
-
-                        img.Save(Path.Combine(sliceDirectoryPath, $"{counter}.jpg"));
-
-                        // S'il y avait une target, on veut remettre le counter à un nombre pair
-                        if (hasTarget)
-                        {
-                            counter++;
-                        }
-                        else // on passe d'un nombre pair à un nombre pair
-                        {
-                            counter += 2;
-                        }
+                        var name = hasTarget? $"{Settings.Default.TargetSliceImagePrefix}{Guid.NewGuid()}.jpg" : $"{Guid.NewGuid()}.jpg";
+                        img.Save(Path.Combine(sliceDirectoryPath, name));
                     }
                 }
             }

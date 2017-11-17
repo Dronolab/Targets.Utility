@@ -1,11 +1,14 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Media.Imaging;
 using Target.Utility.Annotations;
+using Target.Utility.Dtos;
 using Target.Utility.Events;
 using Target.Utility.Models;
 using Target.Utility.Properties;
@@ -21,8 +24,11 @@ namespace Target.Utility.ViewModels
         private ImageSource _displayedImage;
         private ImageModel _currentImageModel;
         private List<ImageModel> _imageList;
-        private MainWindow _window;
-        private bool _done;
+        private readonly MainWindow _window;
+        private bool _ready;
+        private SlackUserDto _user;
+        private string _progressMessage;
+        private int _selectionSquareSize;
 
         #endregion
 
@@ -34,7 +40,11 @@ namespace Target.Utility.ViewModels
             this._imageList = new List<ImageModel>();
             this.SliceCommand = new RelayCommand(Slice);
             this.RemoveLastSelectionCommand = new RelayCommand(RemoveLastSelection);
+            this.RemoveSelectionsCommand = new RelayCommand(RemoveSelections);
+            this.DisplayedImage = new BitmapImage(new Uri(@"pack://application:,,,/Resources/Images/AI.jpg"));
+            this.SelectionSquaredSize = Settings.Default.ResizeMultiple;
             Bootstrapper.GetEventAggregator().GetEvent<NewImageFilesLoadedEvent>().Subscribe(ImageFilesLoaded);
+            Bootstrapper.GetEventAggregator().GetEvent<UserSelectedEvent>().Subscribe(UserSelected);
         }
 
         #endregion
@@ -43,7 +53,16 @@ namespace Target.Utility.ViewModels
 
         public event PropertyChangedEventHandler PropertyChanged;
 
-        private string _progressMessage;
+        public int SelectionSquaredSize
+        {
+            get => _selectionSquareSize;
+            set
+            {
+                _selectionSquareSize = value;
+                OnPropertyChanged(nameof(SelectionSquaredSize));
+            }
+        }
+
 
         public string ProgressMessage
         {
@@ -64,6 +83,15 @@ namespace Target.Utility.ViewModels
                 OnPropertyChanged(nameof(DisplayedImage));
             }
         }
+        public SlackUserDto User
+        {
+            get => _user;
+            set
+            {
+                _user = value;
+                OnPropertyChanged(nameof(User));
+            }
+        }
 
         public int ImageHeight => Settings.Default.ResizeHeight;
 
@@ -72,6 +100,8 @@ namespace Target.Utility.ViewModels
         public ICommand SliceCommand { get; set; }
 
         public ICommand RemoveLastSelectionCommand { get; set; }
+
+        public ICommand RemoveSelectionsCommand { get; set; }
 
         #endregion
 
@@ -103,12 +133,12 @@ namespace Target.Utility.ViewModels
 
             // Display it
             this.DisplayedImage = this._currentImageModel?.ImageSource;
-            this._done = false;
+            this._ready = true;
         }
 
         private void Slice(object obj)
         {
-            if (_done)
+            if (!this._ready)
             {
                 return;
             }
@@ -138,7 +168,7 @@ namespace Target.Utility.ViewModels
             }
         }
 
-        private void LauchWorker()
+        private async void LauchWorker()
         {
             var selections = this._window.GetSelections();
 
@@ -153,27 +183,37 @@ namespace Target.Utility.ViewModels
             worker.WorkerReportsProgress = true;
             worker.RunWorkerAsync(imgController);
             this.ProgressMessage = $"{imgController.ImageFileName} starting...";
+
+            // Attention this code is not thread safe
+            var helper = new RestHelper();
+            this.User.NewPoints = 1;
+            this.User.Points += 1;
+            await helper.UpdateAsync(this._user);
+            this.User.NewPoints = 0;
         }
 
         private void SessionDone()
         {
-            this._done = true;
+            this._ready = false;
             var nbSliced = this._imageList.Count(i => i.Done);
-            var nbSlice = Settings.Default.ResizeHeight / Settings.Default.ResizeMultiple * //todo this math is invalid
+            var nbSlice = Settings.Default.ResizeHeight / Settings.Default.ResizeMultiple *
                           Settings.Default.ResizeWidth / Settings.Default.ResizeMultiple;
-            //Todo display nb point gained?
-            this.ProgressMessage = $"Nice job! Tu as slicer {nbSliced} images! Ça représente ~{nbSlice * nbSliced} slices pour notre AI!";
-            MessageBox.Show($"Nice job! Tu as slicer {nbSliced} images! Ça représente ~{nbSlice * nbSliced} slices pour notre AI!");
 
             this.ResetSession();
+
+            //Todo display nb point gained?
+            this.ProgressMessage = $"Nice job! Tu as slicer {nbSliced} images! Ça représente ~{nbSlice * nbSliced} slices pour notre AI! Tu as maintenant {this.User.Points} points!";
+            MessageBox.Show($"Nice job! Tu as slicer {nbSliced} images! Ça représente ~{nbSlice * nbSliced} slices pour notre AI! Tu as maintenant {this.User.Points} points!");
+
         }
 
         private void ResetSession()
         {
             // todo display done image
-            this.DisplayedImage = null;
+            this.DisplayedImage = new BitmapImage(new Uri(@"pack://application:,,,/Resources/Images/AI.jpg"));
             this._imageList = new List<ImageModel>();
             this.ProgressMessage = string.Empty;
+            this._window.ResetTargetSelection();
             this._currentImageModel = null;
         }
 
@@ -204,6 +244,16 @@ namespace Target.Utility.ViewModels
         {
             var imgController = (ImageController)e.Argument;
             e.Result = new WorkerReportViewModel { Success = imgController.StartSlicing(), ImageFileName = imgController.ImageFileName };
+        }
+
+        private void UserSelected(UserSelectedEvent obj)
+        {
+            this.User = obj.User;
+        }
+
+        private void RemoveSelections(object obj)
+        {
+            this._window.ResetTargetSelection();
         }
 
         #endregion

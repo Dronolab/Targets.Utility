@@ -25,7 +25,6 @@ namespace Target.Utility.ViewModels
             this.LoadImageCommand = new RelayCommand(LoadImages);
             this.ResizeBatchCommand = new RelayCommand(ResizeBatch);
             this.Add32PxDicisionCommand = new RelayCommand(Add32PxDicision);
-            this.ResetTargetSelectionCommand = new RelayCommand(ResetTargetSelection);
             this.EditSettingsCommand = new RelayCommand(EditSettings);
         }
 
@@ -39,7 +38,6 @@ namespace Target.Utility.ViewModels
 
         public ICommand Add32PxDicisionCommand { get; set; }
 
-        public ICommand ResetTargetSelectionCommand { get; set; }
 
         public ICommand EditSettingsCommand { get; set; }
 
@@ -88,11 +86,6 @@ namespace Target.Utility.ViewModels
                 var files = fileDialog.FileNames.ToList();
                 Bootstrapper.GetEventAggregator().GetEvent<NewImageFilesLoadedEvent>().Publish(new NewImageFilesLoadedEvent(files));
             }
-        }
-
-        private void ResetTargetSelection(object obj)
-        {
-            Bootstrapper.GetEventAggregator().GetEvent<ResetTargetSelectionEvent>().Publish();
         }
 
         private void Add32PxDicision(object obj)

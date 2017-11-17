@@ -26,6 +26,7 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
         
         <!--Width resizing-->
@@ -159,5 +160,12 @@
                 Margin="8"
                 Padding="8"
                 Command="{Binding SaveSettingsCommand}"/>
+
+        <TextBlock Grid.Column="0"
+                 Grid.ColumnSpan="2"
+                 Grid.Row="10"
+                 Margin="8,0,8,8"
+                 TextWrapping="Wrap"
+                 Text="CTRL + S = Slice.   CTRL + Z = Undo last selection.    CTRL + X = Remove All selection"/>
     </Grid>
 </Window>

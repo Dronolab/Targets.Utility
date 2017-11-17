@@ -10,7 +10,6 @@ namespace Target.Utility.Windows
 {
     public class JayClass
     {
-        public System.Windows.Point Origine { get; set; }
         public System.Windows.Point Start { get; set; }
         public UIElement Rectangle { get; set; }
     }

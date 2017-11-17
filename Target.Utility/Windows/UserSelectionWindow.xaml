@@ -1,0 +1,49 @@
+﻿<Window x:Class="Target.Utility.Windows.UserSelectionWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Target.Utility.Windows"
+        xmlns:viewModels="clr-namespace:Target.Utility.ViewModels"
+        Height="200"
+        Width="400"
+        mc:Ignorable="d"
+        WindowStartupLocation="CenterScreen"
+        d:DataContext="{d:DesignInstance Type=viewModels:UserSelectionWindowViewModel}"
+        Title="Select your User">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock Grid.Row="0"
+                   Margin="8"
+                   Text="Choisis ton utilisateur pour avoir t'es points pour le prix!"/>
+
+        <ComboBox x:Name="UserSelectionCbx"
+                  Grid.Row="1" 
+                  Margin="8,0"
+                  ItemsSource="{Binding Users}"
+                  SelectedItem="{Binding SelectedUser}">
+            <ComboBox.ItemTemplate>
+                <DataTemplate>
+                    <StackPanel Orientation="Horizontal">
+                        <Image Source="{Binding Image32}"
+                               Height="32"
+                               Width="32"/>
+                        <TextBlock Text="{Binding RealName}"
+                                   Margin="8"/>
+                    </StackPanel>
+                </DataTemplate>
+            </ComboBox.ItemTemplate>
+        </ComboBox>
+
+        <Button Grid.Row="2"
+                Margin="8"
+                Command="{Binding SelectUserCommand}"
+                CommandParameter="{Binding ElementName=UserSelectionCbx,Path=SelectedItem}"
+                Content="Select"/>
+    </Grid>
+</Window>

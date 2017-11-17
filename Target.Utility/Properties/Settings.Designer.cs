@@ -109,7 +109,7 @@ namespace Target.Utility.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("000 - ")]
+        [global::System.Configuration.DefaultSettingValueAttribute("Target - ")]
         public string TargetSliceImagePrefix {
             get {
                 return ((string)(this["TargetSliceImagePrefix"]));

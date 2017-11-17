@@ -7,7 +7,6 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Shapes;
 using Target.Utility.Events;
-using Target.Utility.Properties;
 using Target.Utility.ViewModels;
 
 namespace Target.Utility.Windows
@@ -171,6 +170,28 @@ namespace Target.Utility.Windows
 
         private void Image_OnMouseWheel(object sender, MouseWheelEventArgs e)
         {
+            if (e.Delta > 0)
+            {
+                // todo this is not cool
+                ((SplitImagViewViewModel) this.DataContext).SelectionSquaredSize += 2;
+
+                var m = ((SplitImagViewViewModel) this.DataContext).SelectionSquaredSize;
+                var pos = e.GetPosition(this.Image);
+                var offset = m / 2;
+                Canvas.SetTop(this.PreviewSelectionRectangle, pos.Y - offset);
+                Canvas.SetLeft(this.PreviewSelectionRectangle, pos.X - offset);
+            }
+            else
+            {
+                // todo this is not cool
+                ((SplitImagViewViewModel)this.DataContext).SelectionSquaredSize -= 2;
+
+                var m = ((SplitImagViewViewModel)this.DataContext).SelectionSquaredSize;
+                var pos = e.GetPosition(this.Image);
+                var offset = m / 2;
+                Canvas.SetTop(this.PreviewSelectionRectangle, pos.Y - offset);
+                Canvas.SetLeft(this.PreviewSelectionRectangle, pos.X - offset);
+            }
             //if (this.Image != null)
             //{
             //    var st = GetScaleTransform(this.Image);
@@ -213,6 +234,30 @@ namespace Target.Utility.Windows
 
         private void Image_OnMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
+            var m = ((SplitImagViewViewModel)this.DataContext).SelectionSquaredSize;
+            var jayRect = new Rectangle
+            {
+                Stroke = Brushes.Red,
+                Width = m,
+                Height = m,
+                RenderTransformOrigin = new Point(0.0, 0.0)
+            };
+
+            //var groupR = new TransformGroup();
+            //var stR = new ScaleTransform();
+            //var ttR = new TranslateTransform();
+            //groupR.Children.Add(stR);
+            //groupR.Children.Add(ttR);
+            //jayRect.RenderTransform = groupR;
+
+            var offset = m / 2;
+            var clickedPoint = e.GetPosition(this.Image);
+            Canvas.SetTop(jayRect, clickedPoint.Y - offset);
+            Canvas.SetLeft(jayRect, clickedPoint.X - offset);
+
+            var start = new Point(clickedPoint.X - offset, clickedPoint.Y - offset);
+            this.Canvas.Children.Add(jayRect);
+            this._jayRectangles.Add(new JayClass { Start = start, Rectangle = jayRect });
             //if (this.Image != null && !Keyboard.IsKeyDown(Key.LeftCtrl))
             //{
             //    var tt = GetTranslateTransform(this.Image);
@@ -247,11 +292,6 @@ namespace Target.Utility.Windows
             //}
         }
 
-        private void Image_OnPreviewMouseRightButtonDown(object sender, MouseButtonEventArgs e)
-        {
-            //this.Reset();
-        }
-
         private void Image_OnMouseMove(object sender, MouseEventArgs e)
         {
             //if (this.Image != null && !Keyboard.IsKeyDown(Key.LeftCtrl))
@@ -278,38 +318,10 @@ namespace Target.Utility.Windows
             //}
         }
 
-        private void Canvas_OnMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
-        {
-            var m = Settings.Default.ResizeMultiple;
-            var jayRect = new Rectangle
-            {
-                Stroke = Brushes.Red,
-                Width = m,
-                Height = m,
-                RenderTransformOrigin = new Point(0.0, 0.0)
-            };
-
-            //var groupR = new TransformGroup();
-            //var stR = new ScaleTransform();
-            //var ttR = new TranslateTransform();
-            //groupR.Children.Add(stR);
-            //groupR.Children.Add(ttR);
-            //jayRect.RenderTransform = groupR;
-
-            var offset = m / 2;
-            var clickedPoint = e.GetPosition(this.Canvas);
-            Canvas.SetTop(jayRect, clickedPoint.Y - offset);
-            Canvas.SetLeft(jayRect, clickedPoint.X - offset);
-
-            var start = new Point(clickedPoint.X - offset, clickedPoint.Y - offset);
-            this.Canvas.Children.Add(jayRect);
-            this._jayRectangles.Add(new JayClass { Start = start, Rectangle = jayRect });
-        }
-
         private void Canvas_OnMouseMove(object sender, MouseEventArgs e)
         {
             var pos = e.GetPosition(this.Canvas);
-            var m = Settings.Default.ResizeMultiple;
+            var m = ((SplitImagViewViewModel)this.DataContext).SelectionSquaredSize;
             var offset = m / 2;
             Canvas.SetTop(this.PreviewSelectionRectangle, pos.Y - offset);
             Canvas.SetLeft(this.PreviewSelectionRectangle, pos.X - offset);
@@ -326,8 +338,8 @@ namespace Target.Utility.Windows
             {
                 var selection = new TargetSelectionRegion();
 
-                var startX = Canvas.GetTop(jayRectangle.Rectangle);
-                var startY = Canvas.GetLeft(jayRectangle.Rectangle);
+                var startY = Canvas.GetTop(jayRectangle.Rectangle);
+                var startX = Canvas.GetLeft(jayRectangle.Rectangle);
 
                 selection.StartPixel = new System.Drawing.Point((int)startX, (int)startY);
 
@@ -350,6 +362,11 @@ namespace Target.Utility.Windows
             //var p = e.GetPosition(this.PreviewSelectionRectangle);
             //Canvas.SetTop(this.PreviewSelectionRectangle, p.Y);
             //Canvas.SetLeft(this.PreviewSelectionRectangle, p.X);
+        }
+
+        private void MainWindow_OnContentRendered(object sender, EventArgs e)
+        {
+            UserController.ShowSelectUserWindow();
         }
     }
 }
