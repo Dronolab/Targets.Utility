@@ -15,7 +15,6 @@
                 <MenuItem Header="** Resize Batch" Command="{Binding ResizeBatchCommand}"/>
             </MenuItem>
             <MenuItem Header="** Actions">
-                <MenuItem Header="** Reset target selection" Command="{Binding ResetTargetSelectionCommand}"/>
                 <MenuItem Header="** Add 32 pixels divisions" Command="{Binding Add32PxDicisionCommand}"/>
             </MenuItem>
             <MenuItem Header="** Settings" Command="{Binding EditSettingsCommand}" />

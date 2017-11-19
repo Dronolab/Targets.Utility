@@ -1,4 +1,5 @@
 ﻿using Prism.Events;
+using Target.Utility.Controllers;
 using Target.Utility.ViewModels;
 using Target.Utility.Windows;
 
@@ -22,6 +23,9 @@ namespace Target.Utility.Core
         #endregion
 
         #region Properties
+
+        public static IErrorController ErrorController { get; set; } = new ErrorController();
+
         #endregion
 
         #region Methods

@@ -1,0 +1,18 @@
+﻿<Window x:Class="Target.Utility.Windows.ErrorWindows.SimpleErrorWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Target.Utility.Windows.ErrorWindows"
+        xmlns:viewModels="clr-namespace:Target.Utility.ViewModels"
+        xmlns:errorsViewModels="clr-namespace:Target.Utility.ViewModels.ErrorsViewModels"
+        mc:Ignorable="d"
+        Title="Error" 
+        d:DataContext="{d:DesignInstance Type=errorsViewModels:SimpleErrorViewModel}"
+        Height="400" 
+        Width="300">
+    <Grid>
+        <TextBlock TextWrapping="Wrap"
+                   Text="{Binding ExceptionSimpleDetails}"/>
+    </Grid>
+</Window>

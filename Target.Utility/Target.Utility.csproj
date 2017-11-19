@@ -27,7 +27,7 @@
     <ProductName>Targets Utility</ProductName>
     <PublisherName>Benoit Séguin</PublisherName>
     <SuiteName>Dronolab Imagery</SuiteName>
-    <ApplicationRevision>5</ApplicationRevision>
+    <ApplicationRevision>6</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <CreateDesktopShortcut>true</CreateDesktopShortcut>
@@ -121,6 +121,8 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Controllers\ErrorController.cs" />
+    <Compile Include="Controllers\IErrorController.cs" />
     <Compile Include="Dtos\SlackUserDto.cs" />
     <Compile Include="Events\Add32PxGridEvent.cs" />
     <Compile Include="Core\Bootstrapper.cs" />
@@ -132,10 +134,19 @@
     <Compile Include="Models\TargetSelectionRegion.cs" />
     <Compile Include="Controllers\UserController.cs" />
     <Compile Include="ViewModels\EditSettingsWindowViewModel.cs" />
+    <Compile Include="ViewModels\ErrorsViewModels\ComplexErrorViewModel.cs" />
+    <Compile Include="ViewModels\ErrorsViewModels\SimpleErrorViewModel.cs" />
     <Compile Include="ViewModels\UserSelectionWindowViewModel.cs" />
+    <Compile Include="ViewModels\ViewModel.cs" />
     <Compile Include="ViewModels\WorkerReportViewModel.cs" />
     <Compile Include="Windows\EditSettingsWindow.xaml.cs">
       <DependentUpon>EditSettingsWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Windows\ErrorWindows\ComplexErrorWindow.xaml.cs">
+      <DependentUpon>ComplexErrorWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Windows\ErrorWindows\SimpleErrorWindow.xaml.cs">
+      <DependentUpon>SimpleErrorWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="Windows\JayClass.cs" />
     <Compile Include="Windows\Menu.xaml.cs">
@@ -151,6 +162,14 @@
       <DependentUpon>UserSelectionWindow.xaml</DependentUpon>
     </Compile>
     <Page Include="Windows\EditSettingsWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Windows\ErrorWindows\ComplexErrorWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Windows\ErrorWindows\SimpleErrorWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
