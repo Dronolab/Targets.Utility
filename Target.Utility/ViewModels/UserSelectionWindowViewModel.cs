@@ -4,6 +4,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Windows.Input;
 using Target.Utility.Annotations;
+using Target.Utility.Core;
 using Target.Utility.Dtos;
 using Target.Utility.Events;
 using Target.Utility.Windows;

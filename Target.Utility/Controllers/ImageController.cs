@@ -7,10 +7,11 @@ using System.IO;
 using System.Linq;
 using System.Windows;
 using Microsoft.Win32;
+using Target.Utility.Models;
 using Target.Utility.Properties;
 using Point = System.Drawing.Point;
 
-namespace Target.Utility
+namespace Target.Utility.Controllers
 {
     public class ImageController
     {
@@ -49,15 +50,6 @@ namespace Target.Utility
             var height = Settings.Default.ResizeHeight;
             var destRect = new Rectangle(0, 0, width, height);
             var destImage = new Bitmap(width, height);
-
-            // todo validate that the xmp and exif are copied
-            if (Settings.Default.KeepExif && Settings.Default.KeepXmp)
-            {
-                foreach (var propItem in img.PropertyItems)
-                {
-                    destImage.SetPropertyItem(propItem);
-                }
-            }
 
             // todo is this usefull?
             destImage.SetResolution(img.HorizontalResolution, img.VerticalResolution);
@@ -136,7 +128,7 @@ namespace Target.Utility
                             }
                         }
 
-                        var name = hasTarget? $"{Settings.Default.TargetSliceImagePrefix}{Guid.NewGuid()}.jpg" : $"{Guid.NewGuid()}.jpg";
+                        var name = hasTarget ? $"{Settings.Default.TargetSliceImagePrefix}{Guid.NewGuid()} - i={i * multiple}, j={j * multiple}.jpg" : $"{Guid.NewGuid()} - i={i * multiple}, j={j * multiple}.jpg";
                         img.Save(Path.Combine(sliceDirectoryPath, name));
                     }
                 }
@@ -156,7 +148,6 @@ namespace Target.Utility
             // Settings
             var t = Settings.Default.Tolerance;
             var m = Settings.Default.ResizeMultiple;
-            var counter = 10001;
 
             foreach (var selection in this._selections)
             {
@@ -196,8 +187,7 @@ namespace Target.Utility
                         {
                             graphics.DrawImage(this._img, new Rectangle(0, 0, m, m), new Rectangle(i, j, m, m), GraphicsUnit.Pixel);
 
-                            img.Save(Path.Combine(sliceDirectoryPath, $"{Settings.Default.TargetSliceImagePrefix}{counter}.jpg"));
-                            counter += 2;
+                            img.Save(Path.Combine(sliceDirectoryPath, $"{Settings.Default.TargetSliceImagePrefix}{Guid.NewGuid()} - i={i}, j={j}.jpg"));
                         }
                     }
                 }

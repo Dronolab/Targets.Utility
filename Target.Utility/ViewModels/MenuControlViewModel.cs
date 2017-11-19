@@ -5,6 +5,7 @@ using System.Runtime.CompilerServices;
 using System.Windows.Input;
 using Microsoft.Win32;
 using Target.Utility.Annotations;
+using Target.Utility.Core;
 using Target.Utility.Events;
 
 namespace Target.Utility.ViewModels

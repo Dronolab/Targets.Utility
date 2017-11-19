@@ -6,7 +6,11 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Shapes;
+using Target.Utility.Controllers;
+using Target.Utility.Core;
 using Target.Utility.Events;
+using Target.Utility.Models;
+using Target.Utility.Properties;
 using Target.Utility.ViewModels;
 
 namespace Target.Utility.Windows
@@ -51,31 +55,36 @@ namespace Target.Utility.Windows
 
         private void Add32PxGrid()
         {
-            var horLinesCount = this.Canvas.ActualHeight / 32;
-            var verLinesCount = this.Canvas.ActualWidth / 32;
+            var m = Settings.Default.ResizeMultiple;
+            var horLinesCount = this.Canvas.ActualHeight / m;
+            var verLinesCount = this.Canvas.ActualWidth / m;
 
             for (int i = 0; i < horLinesCount; i++)
             {
-                var line = new Line(); line.Stroke = Brushes.Firebrick;
-                line.X1 = 0;
-                line.X2 = this.Canvas.ActualWidth;
-                line.Y1 = i * 32;
-                line.Y2 = i * 32;
-                line.StrokeThickness = 1;
-
+                var line = new Line
+                {
+                    Stroke = Brushes.Firebrick,
+                    X1 = 0,
+                    X2 = this.Canvas.ActualWidth,
+                    Y1 = i * m,
+                    Y2 = i * m,
+                    StrokeThickness = 1
+                };
                 gridLines.Add(line);
                 this.Canvas.Children.Add(line);
             }
 
             for (int i = 0; i < verLinesCount; i++)
             {
-                var line = new Line(); line.Stroke = Brushes.Firebrick;
-                line.X1 = i * 32;
-                line.X2 = i * 32;
-                line.Y1 = 0;
-                line.Y2 = this.Canvas.ActualHeight;
-                line.StrokeThickness = 1;
-
+                var line = new Line
+                {
+                    Stroke = Brushes.Firebrick,
+                    X1 = i * m,
+                    X2 = i * m,
+                    Y1 = 0,
+                    Y2 = this.Canvas.ActualHeight,
+                    StrokeThickness = 1
+                };
                 gridLines.Add(line);
                 this.Canvas.Children.Add(line);
             }
@@ -173,9 +182,9 @@ namespace Target.Utility.Windows
             if (e.Delta > 0)
             {
                 // todo this is not cool
-                ((SplitImagViewViewModel) this.DataContext).SelectionSquaredSize += 2;
+                ((SplitImagViewViewModel)this.DataContext).SelectionSquaredSize += 2;
 
-                var m = ((SplitImagViewViewModel) this.DataContext).SelectionSquaredSize;
+                var m = ((SplitImagViewViewModel)this.DataContext).SelectionSquaredSize;
                 var pos = e.GetPosition(this.Image);
                 var offset = m / 2;
                 Canvas.SetTop(this.PreviewSelectionRectangle, pos.Y - offset);
@@ -340,14 +349,17 @@ namespace Target.Utility.Windows
 
                 var startY = Canvas.GetTop(jayRectangle.Rectangle);
                 var startX = Canvas.GetLeft(jayRectangle.Rectangle);
+                //If selection is out of the image bound, we move it so it will fit in the image boundaries
+                var offsetY = startY < 0 ? Math.Abs(startY) : 0; // if selection is before image
+                var offsetX = startX < 0 ? Math.Abs(startX) : 0; // if selection is before image 
 
-                selection.StartPixel = new System.Drawing.Point((int)startX, (int)startY);
+                selection.StartPixel = new System.Drawing.Point((int)(startX + offsetX), (int)(startY + offsetY));
 
                 var rectWidth = ((Rectangle)jayRectangle.Rectangle).ActualWidth;
                 var rectHeight = ((Rectangle)jayRectangle.Rectangle).ActualHeight;
 
-                var endX = Math.Round(rectWidth + startX);
-                var endY = Math.Round(rectHeight + startY);
+                var endX = Math.Round(rectWidth + startX + offsetX);
+                var endY = Math.Round(rectHeight + startY + offsetY);
 
                 selection.EndPixel = new System.Drawing.Point((int)endX, (int)endY);
                 selections.Add(selection);

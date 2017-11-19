@@ -1,13 +1,8 @@
-﻿using System;
-using System.Drawing.Imaging;
-using System.IO;
-using System.Windows.Media.Imaging;
-using Prism.Events;
-using Target.Utility.Properties;
+﻿using Prism.Events;
 using Target.Utility.ViewModels;
 using Target.Utility.Windows;
 
-namespace Target.Utility
+namespace Target.Utility.Core
 {
     public class Bootstrapper
     {

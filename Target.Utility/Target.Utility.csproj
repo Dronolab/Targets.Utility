@@ -27,7 +27,7 @@
     <ProductName>Targets Utility</ProductName>
     <PublisherName>Benoit Séguin</PublisherName>
     <SuiteName>Dronolab Imagery</SuiteName>
-    <ApplicationRevision>2</ApplicationRevision>
+    <ApplicationRevision>5</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <CreateDesktopShortcut>true</CreateDesktopShortcut>
@@ -123,14 +123,14 @@
     </ApplicationDefinition>
     <Compile Include="Dtos\SlackUserDto.cs" />
     <Compile Include="Events\Add32PxGridEvent.cs" />
-    <Compile Include="Bootstrapper.cs" />
+    <Compile Include="Core\Bootstrapper.cs" />
     <Compile Include="Events\UserSelectedEvent.cs" />
-    <Compile Include="HumanHelper.cs" />
-    <Compile Include="ImageController.cs" />
+    <Compile Include="Core\HumanHelper.cs" />
+    <Compile Include="Controllers\ImageController.cs" />
     <Compile Include="Models\ImageModel.cs" />
-    <Compile Include="RestHelper.cs" />
-    <Compile Include="TargetSelectionRegion.cs" />
-    <Compile Include="UserController.cs" />
+    <Compile Include="Core\RestHelper.cs" />
+    <Compile Include="Models\TargetSelectionRegion.cs" />
+    <Compile Include="Controllers\UserController.cs" />
     <Compile Include="ViewModels\EditSettingsWindowViewModel.cs" />
     <Compile Include="ViewModels\UserSelectionWindowViewModel.cs" />
     <Compile Include="ViewModels\WorkerReportViewModel.cs" />
@@ -144,7 +144,7 @@
     <Compile Include="ViewModels\MenuControlViewModel.cs" />
     <Compile Include="Events\NewImageFilesLoadedEvent.cs" />
     <Compile Include="Properties\Annotations.cs" />
-    <Compile Include="RelayCommand.cs" />
+    <Compile Include="Core\RelayCommand.cs" />
     <Compile Include="Events\ResetTargetSelectionEvent.cs" />
     <Compile Include="ViewModels\SplitImagViewViewModel.cs" />
     <Compile Include="Windows\UserSelectionWindow.xaml.cs">

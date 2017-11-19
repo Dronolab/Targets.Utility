@@ -1,13 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using System.Text;
 using System.Threading.Tasks;
 using Target.Utility.Dtos;
 
-namespace Target.Utility
+namespace Target.Utility.Core
 {
     /// <summary>
     /// Cette classe contient des méthodes d'extention sur HttpContent (System.Net.Http.Formatting.Extension).

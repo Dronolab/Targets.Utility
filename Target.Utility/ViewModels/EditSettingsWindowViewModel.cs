@@ -3,6 +3,7 @@ using System.Runtime.CompilerServices;
 using System.Windows.Forms;
 using System.Windows.Input;
 using Target.Utility.Annotations;
+using Target.Utility.Core;
 using Target.Utility.Properties;
 using MessageBox = System.Windows.MessageBox;
 
