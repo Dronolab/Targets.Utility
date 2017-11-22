@@ -18,7 +18,7 @@ namespace Target.Utility.Controllers
         public void ShowExceptionDetailed(Exception ex)
         {
             var viewModel = new ComplexErrorViewModel(ex);
-            var window = new ComplexErrorWindow();
+            var window = new ComplexErrorWindow(viewModel);
             viewModel.Window = window;
 
             window.ShowDialog();

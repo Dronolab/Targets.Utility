@@ -24,7 +24,7 @@ namespace Target.Utility.ViewModels.ErrorsViewModels
 
         public string ExceptionSimpleDetails
         {
-            get { return _exceptionSimpleDetails; }
+            get => _exceptionSimpleDetails;
             set
             {
                 _exceptionSimpleDetails = value;

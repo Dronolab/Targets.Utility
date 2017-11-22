@@ -14,15 +14,6 @@ namespace Target.Utility.ViewModels
 
         #endregion
 
-        #region Constructors
-
-        public ViewModel()
-        {
-            
-        }
-
-        #endregion
-
         #region Properties
 
         public Window Window { get; set; }
@@ -30,9 +21,6 @@ namespace Target.Utility.ViewModels
         #endregion
 
         #region Methods
-
-        #region Public
-        #endregion
 
         #region Protected
 
@@ -42,9 +30,6 @@ namespace Target.Utility.ViewModels
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
-        #endregion
-
-        #region Private
         #endregion
 
         #endregion

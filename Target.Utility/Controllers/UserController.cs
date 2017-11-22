@@ -7,7 +7,7 @@ namespace Target.Utility.Controllers
         public static void ShowSelectUserWindow()
         {
             var window = new UserSelectionWindow();
-            window.Show();
+            window.ShowDialog();
         }
     }
 }

@@ -27,7 +27,7 @@
     <ProductName>Targets Utility</ProductName>
     <PublisherName>Benoit Séguin</PublisherName>
     <SuiteName>Dronolab Imagery</SuiteName>
-    <ApplicationRevision>6</ApplicationRevision>
+    <ApplicationRevision>9</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <CreateDesktopShortcut>true</CreateDesktopShortcut>
@@ -126,11 +126,13 @@
     <Compile Include="Dtos\SlackUserDto.cs" />
     <Compile Include="Events\Add32PxGridEvent.cs" />
     <Compile Include="Core\Bootstrapper.cs" />
+    <Compile Include="Events\Remove32PxGridEvent.cs" />
     <Compile Include="Events\UserSelectedEvent.cs" />
     <Compile Include="Core\HumanHelper.cs" />
     <Compile Include="Controllers\ImageController.cs" />
     <Compile Include="Models\ImageModel.cs" />
     <Compile Include="Core\RestHelper.cs" />
+    <Compile Include="Models\SelectionPoint.cs" />
     <Compile Include="Models\TargetSelectionRegion.cs" />
     <Compile Include="Controllers\UserController.cs" />
     <Compile Include="ViewModels\EditSettingsWindowViewModel.cs" />

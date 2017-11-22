@@ -9,7 +9,6 @@ using System.Windows;
 using Microsoft.Win32;
 using Target.Utility.Models;
 using Target.Utility.Properties;
-using Point = System.Drawing.Point;
 
 namespace Target.Utility.Controllers
 {
@@ -51,7 +50,6 @@ namespace Target.Utility.Controllers
             var destRect = new Rectangle(0, 0, width, height);
             var destImage = new Bitmap(width, height);
 
-            // todo is this usefull?
             destImage.SetResolution(img.HorizontalResolution, img.VerticalResolution);
 
             using (var graphics = Graphics.FromImage(destImage))
@@ -96,8 +94,70 @@ namespace Target.Utility.Controllers
             var slicesPath = Path.Combine(outputPath, $"{this.ImageFileName} - {DateTime.Now:yyyy-MM-dd HH-mm-ss} - slices");
             Directory.CreateDirectory(slicesPath);
 
+            this.AdjustSelection();
+
             // Start slicing
             this.CreateMiniatures(slicesPath); // needs the user selection
+        }
+
+        /// <summary>
+        /// Adjusts the selection to prevent false positive.
+        /// </summary>
+        private void AdjustSelection()
+        {
+            var m = Settings.Default.ResizeMultiple;
+            var tolerancePercent = Settings.Default.Tolerance;
+            var t = m * tolerancePercent;
+
+            foreach (var selection in this._selections)
+            {
+                // start point
+                // check x offset
+                var xStartOffset = selection.StartPixel.X % m;
+                if (xStartOffset <= t)
+                {
+                    selection.StartPixel.X -= xStartOffset;
+                }
+                else if (m - xStartOffset <= t)
+                {
+                    selection.StartPixel.X += m - xStartOffset;
+                }
+
+                // check y offset
+                var yStartOffset = selection.StartPixel.Y % m;
+                if (yStartOffset <= t)
+                {
+                    selection.StartPixel.Y -= yStartOffset;
+                }
+                else if (m - yStartOffset <= t)
+                {
+                    selection.StartPixel.Y += m - yStartOffset;
+                }
+
+                // end point
+                // check x offset
+                var xEndOffset = selection.EndPixel.X % m;
+                if (xEndOffset <= t)
+                {
+                    selection.EndPixel.X -= xEndOffset;
+                }
+                else if (m - xEndOffset <= t)
+                {
+                    selection.EndPixel.X += m - xEndOffset;
+                }
+
+                // check y offset
+                var yEndOffset = selection.EndPixel.Y % m;
+                if (yEndOffset <= t)
+                {
+                    selection.EndPixel.Y -= yEndOffset;
+                }
+                else if (m - yEndOffset <= t)
+                {
+                    selection.EndPixel.Y += m - yEndOffset;
+                }
+
+            }
         }
 
         /// <summary>
@@ -146,42 +206,21 @@ namespace Target.Utility.Controllers
         private void CreateMiniatureOfTarget(string sliceDirectoryPath)
         {
             // Settings
-            var t = Settings.Default.Tolerance;
             var m = Settings.Default.ResizeMultiple;
+            var width = Settings.Default.ResizeWidth;
+            var height = Settings.Default.ResizeHeight;
 
             foreach (var selection in this._selections)
             {
-                var tw = selection.EndPixel.X - selection.StartPixel.X; // target width
-                var th = selection.EndPixel.Y - selection.StartPixel.Y; // target height
-
-                // Rework endpoint flages
-                var reworkWith = false;
-                var reworkHeight = false;
-
-                var wd = tw % m; // Width overflow
-                if (tw > m && this.DontRespectTolerance(wd, t, m))
-                {
-                    reworkWith = true;
-                }
-
-                var hd = th % m; // Width overflow
-                if (th > m && this.DontRespectTolerance(hd, t, m))
-                {
-                    reworkHeight = true;
-                }
-
-                if (reworkWith || reworkHeight)
-                {
-                    var oldPoint = selection.EndPixel;
-                    var newX = reworkWith ? wd + t * m >= m ? oldPoint.X + m : oldPoint.X - wd : oldPoint.X; // shorthen of enlarge selection
-                    var newY = reworkHeight ? hd + t * m >= m ? oldPoint.Y + m : oldPoint.Y - hd : oldPoint.Y; // shorthen of enlarge selection
-                    selection.EndPixel = new Point(newX, newY); // We want a selection that is a multiple of multiple
-                }
-
                 for (int i = selection.StartPixel.X; i < selection.EndPixel.X; i += 32)
                 {
                     for (int j = selection.StartPixel.Y; j < selection.EndPixel.Y; j += 32)
                     {
+                        if (i + m > width || j + m > height)
+                        {
+                            continue;
+                        }
+
                         var img = new Bitmap(m, m);
                         using (var graphics = Graphics.FromImage(img))
                         {
@@ -213,28 +252,16 @@ namespace Target.Utility.Controllers
             //settings
             var m = Settings.Default.ResizeMultiple;
 
-            //            [Check if start is there]   [check if end is there]
-            var inRange = sx >= i && sx < i + m || ex > i && ex < i + 32;
-
-            //   [Check if start is there]  [check if end is there]
-            if (!(sy >= j && sy < j + m || ey > j && ey < j + 32))
+            // https://stackoverflow.com/questions/13513932/algorithm-to-detect-overlapping-periods
+            // Checking if the ranges are overlapping
+            var inRange = i < ex && sx < i + m;
+            var heightinRangeToo = j < ey && sy < j + m;
+            if (!heightinRangeToo)
             {
                 inRange = false;
             }
 
             return inRange;
-        }
-
-        /// <summary>
-        /// Deprecated
-        /// </summary>
-        /// <param name="distance"></param>
-        /// <param name="tolerance"></param>
-        /// <param name="multiple"></param>
-        /// <returns></returns>
-        private bool DontRespectTolerance(double distance, double tolerance, double multiple)
-        {
-            return distance <= multiple * tolerance || distance >= multiple - multiple * tolerance;
         }
 
         #endregion

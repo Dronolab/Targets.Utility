@@ -26,6 +26,7 @@ namespace Target.Utility.ViewModels
             this.LoadImageCommand = new RelayCommand(LoadImages);
             this.ResizeBatchCommand = new RelayCommand(ResizeBatch);
             this.Add32PxDicisionCommand = new RelayCommand(Add32PxDicision);
+            this.Remove32PxDicisionCommand = new RelayCommand(Remove32PxDicision);
             this.EditSettingsCommand = new RelayCommand(EditSettings);
         }
 
@@ -39,6 +40,7 @@ namespace Target.Utility.ViewModels
 
         public ICommand Add32PxDicisionCommand { get; set; }
 
+        public ICommand Remove32PxDicisionCommand { get; set; }
 
         public ICommand EditSettingsCommand { get; set; }
 
@@ -92,6 +94,11 @@ namespace Target.Utility.ViewModels
         private void Add32PxDicision(object obj)
         {
             Bootstrapper.GetEventAggregator().GetEvent<Add32PxGridEvent>().Publish();
+        }
+
+        private void Remove32PxDicision(object obj)
+        {
+            Bootstrapper.GetEventAggregator().GetEvent<Remove32PxGridEvent>().Publish();
         }
 
         private void EditSettings(object obj)

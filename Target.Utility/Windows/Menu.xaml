@@ -6,8 +6,7 @@
              xmlns:local="clr-namespace:Target.Utility"
              xmlns:viewModels="clr-namespace:Target.Utility.ViewModels"
              mc:Ignorable="d" 
-             d:DataContext="{d:DesignInstance Type=viewModels:MenuControlViewModel}"
-             d:DesignHeight="300" d:DesignWidth="300">
+             d:DataContext="{d:DesignInstance Type=viewModels:MenuControlViewModel}">
     <Grid>
         <Menu>
             <MenuItem Header="** File">
@@ -16,6 +15,7 @@
             </MenuItem>
             <MenuItem Header="** Actions">
                 <MenuItem Header="** Add 32 pixels divisions" Command="{Binding Add32PxDicisionCommand}"/>
+                <MenuItem Header="** Remove 32 pixels divisions" Command="{Binding Remove32PxDicisionCommand}"/>
             </MenuItem>
             <MenuItem Header="** Settings" Command="{Binding EditSettingsCommand}" />
         </Menu>

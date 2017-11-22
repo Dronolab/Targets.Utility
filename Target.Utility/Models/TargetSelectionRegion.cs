@@ -4,7 +4,7 @@ namespace Target.Utility.Models
 {
     public class TargetSelectionRegion
     {
-        public Point StartPixel { get; set; }
-        public Point EndPixel { get; set; }
+        public SelectionPoint StartPixel { get; set; }
+        public SelectionPoint EndPixel { get; set; }
     }
 }

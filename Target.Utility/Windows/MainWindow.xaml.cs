@@ -23,17 +23,18 @@ namespace Target.Utility.Windows
         //private Point origin;
         //private Point startP;
 
-        private List<Line> gridLines;
+        private List<Line> _gridLines;
         private List<JayClass> _jayRectangles;
 
         public MainWindow()
         {
             InitializeComponent();
             Bootstrapper.GetEventAggregator().GetEvent<Add32PxGridEvent>().Subscribe(Add32PxGrid);
+            Bootstrapper.GetEventAggregator().GetEvent<Remove32PxGridEvent>().Subscribe(Remove32PxGrid);
             Bootstrapper.GetEventAggregator().GetEvent<ResetTargetSelectionEvent>().Subscribe(ResetTargetSelection);
 
             this.DataContext = new SplitImagViewViewModel(this);
-            this.gridLines = new List<Line>();
+            this._gridLines = new List<Line>();
 
             //var group = new TransformGroup();
             //var st = new ScaleTransform();
@@ -70,7 +71,7 @@ namespace Target.Utility.Windows
                     Y2 = i * m,
                     StrokeThickness = 1
                 };
-                gridLines.Add(line);
+                _gridLines.Add(line);
                 this.Canvas.Children.Add(line);
             }
 
@@ -85,9 +86,19 @@ namespace Target.Utility.Windows
                     Y2 = this.Canvas.ActualHeight,
                     StrokeThickness = 1
                 };
-                gridLines.Add(line);
+                _gridLines.Add(line);
                 this.Canvas.Children.Add(line);
             }
+        }
+
+        public void Remove32PxGrid()
+        {
+            foreach (var line in _gridLines)
+            {
+                this.Canvas.Children.Remove(line);
+            }
+
+            _gridLines = new List<Line>();
         }
 
         private void UIElement_OnDrop(object sender, DragEventArgs e)
@@ -353,7 +364,7 @@ namespace Target.Utility.Windows
                 var offsetY = startY < 0 ? Math.Abs(startY) : 0; // if selection is before image
                 var offsetX = startX < 0 ? Math.Abs(startX) : 0; // if selection is before image 
 
-                selection.StartPixel = new System.Drawing.Point((int)(startX + offsetX), (int)(startY + offsetY));
+                selection.StartPixel = new SelectionPoint((int)(startX + offsetX), (int)(startY + offsetY));
 
                 var rectWidth = ((Rectangle)jayRectangle.Rectangle).ActualWidth;
                 var rectHeight = ((Rectangle)jayRectangle.Rectangle).ActualHeight;
@@ -361,7 +372,7 @@ namespace Target.Utility.Windows
                 var endX = Math.Round(rectWidth + startX + offsetX);
                 var endY = Math.Round(rectHeight + startY + offsetY);
 
-                selection.EndPixel = new System.Drawing.Point((int)endX, (int)endY);
+                selection.EndPixel = new SelectionPoint((int)endX, (int)endY);
                 selections.Add(selection);
             }
 
