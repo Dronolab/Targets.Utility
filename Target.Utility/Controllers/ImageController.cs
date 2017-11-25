@@ -64,7 +64,9 @@ namespace Target.Utility.Controllers
                 {
                     wrapMode.SetWrapMode(WrapMode.TileFlipXY);
                     graphics.DrawImage(img, destRect, 0, 0, img.Width, img.Height, GraphicsUnit.Pixel, wrapMode);
+                    wrapMode.Dispose();
                 }
+                graphics.Dispose();
             }
 
             return destImage;
@@ -190,6 +192,8 @@ namespace Target.Utility.Controllers
 
                         var name = hasTarget ? $"{Settings.Default.TargetSliceImagePrefix}{Guid.NewGuid()} - i={i * multiple}, j={j * multiple}.jpg" : $"{Guid.NewGuid()} - i={i * multiple}, j={j * multiple}.jpg";
                         img.Save(Path.Combine(sliceDirectoryPath, name));
+                        img.Dispose();
+                        graphics.Dispose();
                     }
                 }
             }
@@ -227,6 +231,8 @@ namespace Target.Utility.Controllers
                             graphics.DrawImage(this._img, new Rectangle(0, 0, m, m), new Rectangle(i, j, m, m), GraphicsUnit.Pixel);
 
                             img.Save(Path.Combine(sliceDirectoryPath, $"{Settings.Default.TargetSliceImagePrefix}{Guid.NewGuid()} - i={i}, j={j}.jpg"));
+                            img.Dispose();
+                            graphics.Dispose();
                         }
                     }
                 }

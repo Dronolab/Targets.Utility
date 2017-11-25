@@ -237,7 +237,7 @@ namespace Target.Utility.ViewModels
             }
             else
             {
-                var result = (WorkerReportViewModel)e.Result;
+                var result = (WorkerReport)e.Result;
                 this.ProgressMessage = $"{result.ImageFileName} sliced!";
             }
         }
@@ -245,7 +245,7 @@ namespace Target.Utility.ViewModels
         private void DoSlincing(object sender, DoWorkEventArgs e)
         {
             var imgController = (ImageController)e.Argument;
-            e.Result = new WorkerReportViewModel { Success = imgController.StartSlicing(), ImageFileName = imgController.ImageFileName };
+            e.Result = new WorkerReport { Success = imgController.StartSlicing(), ImageFileName = imgController.ImageFileName };
         }
 
         private void UserSelected(UserSelectedEvent obj)

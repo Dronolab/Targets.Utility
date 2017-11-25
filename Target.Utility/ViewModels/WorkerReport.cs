@@ -2,7 +2,7 @@
 
 namespace Target.Utility.ViewModels
 {
-    public class WorkerReportViewModel
+    public class WorkerReport
     {
         public bool Success { get; set; }
         public string ImageFileName { get; set; }

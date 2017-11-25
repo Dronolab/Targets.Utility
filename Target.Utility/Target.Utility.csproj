@@ -27,7 +27,7 @@
     <ProductName>Targets Utility</ProductName>
     <PublisherName>Benoit Séguin</PublisherName>
     <SuiteName>Dronolab Imagery</SuiteName>
-    <ApplicationRevision>9</ApplicationRevision>
+    <ApplicationRevision>11</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <CreateDesktopShortcut>true</CreateDesktopShortcut>
@@ -140,7 +140,7 @@
     <Compile Include="ViewModels\ErrorsViewModels\SimpleErrorViewModel.cs" />
     <Compile Include="ViewModels\UserSelectionWindowViewModel.cs" />
     <Compile Include="ViewModels\ViewModel.cs" />
-    <Compile Include="ViewModels\WorkerReportViewModel.cs" />
+    <Compile Include="ViewModels\WorkerReport.cs" />
     <Compile Include="Windows\EditSettingsWindow.xaml.cs">
       <DependentUpon>EditSettingsWindow.xaml</DependentUpon>
     </Compile>
