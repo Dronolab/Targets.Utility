@@ -49,6 +49,7 @@ namespace Target.Utility.Models
                         this._imageSource.UriSource = new Uri(Path);
                         this._imageSource.StreamSource = memStream2;
                         this._imageSource.EndInit();
+                        memStream2.Dispose();
                     }
 
                     // Mark it as loaded
@@ -62,6 +63,7 @@ namespace Target.Utility.Models
         public void Dispose()
         {
             Image?.Dispose();
+            this._imageSource = null;
         }
     }
 }

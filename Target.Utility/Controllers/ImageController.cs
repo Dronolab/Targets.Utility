@@ -18,13 +18,13 @@ namespace Target.Utility.Controllers
         #region Fields
 
         private readonly List<TargetSelectionRegion> _selections;
-        private readonly Image _img;
+        private readonly ImageModel _img;
 
         #endregion
 
         #region Constructors
 
-        public ImageController(Image img, List<TargetSelectionRegion> selections, string imgName)
+        public ImageController(ImageModel img, List<TargetSelectionRegion> selections, string imgName)
         {
             this._selections = selections;
             this._img = img;
@@ -179,7 +179,7 @@ namespace Target.Utility.Controllers
                     var img = new Bitmap(multiple, multiple);
                     using (var graphics = Graphics.FromImage(img))
                     {
-                        graphics.DrawImage(this._img, new Rectangle(0, 0, multiple, multiple), new Rectangle(i * multiple, j * multiple, multiple, multiple), GraphicsUnit.Pixel);
+                        graphics.DrawImage(this._img.Image, new Rectangle(0, 0, multiple, multiple), new Rectangle(i * multiple, j * multiple, multiple, multiple), GraphicsUnit.Pixel);
 
                         var hasTarget = false;
                         foreach (var selection in this._selections)
@@ -228,7 +228,7 @@ namespace Target.Utility.Controllers
                         var img = new Bitmap(m, m);
                         using (var graphics = Graphics.FromImage(img))
                         {
-                            graphics.DrawImage(this._img, new Rectangle(0, 0, m, m), new Rectangle(i, j, m, m), GraphicsUnit.Pixel);
+                            graphics.DrawImage(this._img.Image, new Rectangle(0, 0, m, m), new Rectangle(i, j, m, m), GraphicsUnit.Pixel);
 
                             img.Save(Path.Combine(sliceDirectoryPath, $"{Settings.Default.TargetSliceImagePrefix}{Guid.NewGuid()} - i={i}, j={j}.jpg"));
                             img.Dispose();

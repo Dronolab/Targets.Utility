@@ -176,7 +176,7 @@ namespace Target.Utility.ViewModels
 
             // Create a controller to slice the image
             var imgName = this._currentImageModel.Path.Split('\\').LastOrDefault();
-            var imgController = new ImageController(this._currentImageModel.Image, selections, imgName);
+            var imgController = new ImageController(this._currentImageModel, selections, imgName);
 
             // Create background task with progress
             var worker = new BackgroundWorker();
@@ -206,7 +206,6 @@ namespace Target.Utility.ViewModels
             //Todo display nb point gained?
             this.ProgressMessage = $"Nice job! Tu as slicer {nbSliced} images! Ça représente ~{nbSlice * nbSliced} slices pour notre AI! Tu as maintenant {this.User.Points} points!";
             MessageBox.Show($"Nice job! Tu as slicer {nbSliced} images! Ça représente ~{nbSlice * nbSliced} slices pour notre AI! Tu as maintenant {this.User.Points} points!");
-
         }
 
         private void ResetSession()

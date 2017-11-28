@@ -43,6 +43,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -150,6 +151,9 @@
     <Compile Include="Windows\ErrorWindows\SimpleErrorWindow.xaml.cs">
       <DependentUpon>SimpleErrorWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Windows\FilterTargetWindow.xaml.cs">
+      <DependentUpon>FilterTargetWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Windows\JayClass.cs" />
     <Compile Include="Windows\Menu.xaml.cs">
       <DependentUpon>Menu.xaml</DependentUpon>
@@ -172,6 +176,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Windows\ErrorWindows\SimpleErrorWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Windows\FilterTargetWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
