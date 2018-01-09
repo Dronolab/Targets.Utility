@@ -27,7 +27,7 @@
     <ProductName>Targets Utility</ProductName>
     <PublisherName>Benoit Séguin</PublisherName>
     <SuiteName>Dronolab Imagery</SuiteName>
-    <ApplicationRevision>11</ApplicationRevision>
+    <ApplicationRevision>12</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <CreateDesktopShortcut>true</CreateDesktopShortcut>

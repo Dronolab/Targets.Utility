@@ -43,17 +43,28 @@ namespace Target.Utility.Controllers
 
         #region Public
 
+        /// <summary>
+        /// Resizes the image.
+        /// </summary>
+        /// <param name="img">The img.</param>
+        /// <returns>
+        /// A new instance of the resized image
+        /// </returns>
         public static Image ResizeImage(Image img)
         {
+            // Get the new size
             var width = Settings.Default.ResizeWidth;
             var height = Settings.Default.ResizeHeight;
             var destRect = new Rectangle(0, 0, width, height);
+            // Creates the new Image
             var destImage = new Bitmap(width, height);
 
+            // Keep the same resolution 
             destImage.SetResolution(img.HorizontalResolution, img.VerticalResolution);
 
             using (var graphics = Graphics.FromImage(destImage))
             {
+                // Set up the resize settings
                 graphics.CompositingMode = CompositingMode.SourceCopy;
                 graphics.CompositingQuality = CompositingQuality.HighQuality;
                 graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
@@ -63,6 +74,7 @@ namespace Target.Utility.Controllers
                 using (var wrapMode = new ImageAttributes())
                 {
                     wrapMode.SetWrapMode(WrapMode.TileFlipXY);
+                    // Create a resized version of the image
                     graphics.DrawImage(img, destRect, 0, 0, img.Width, img.Height, GraphicsUnit.Pixel, wrapMode);
                     wrapMode.Dispose();
                 }
@@ -104,6 +116,7 @@ namespace Target.Utility.Controllers
 
         /// <summary>
         /// Adjusts the selection to prevent false positive.
+        /// We try to put the selection's rectangle in a format of m*m if possible (near) and to move this rectangle to fit the default "slices" grid
         /// </summary>
         private void AdjustSelection()
         {
@@ -181,6 +194,7 @@ namespace Target.Utility.Controllers
                     {
                         graphics.DrawImage(this._img.Image, new Rectangle(0, 0, multiple, multiple), new Rectangle(i * multiple, j * multiple, multiple, multiple), GraphicsUnit.Pixel);
 
+                        // Check if the current grid cell has a target
                         var hasTarget = false;
                         foreach (var selection in this._selections)
                         {
@@ -220,6 +234,7 @@ namespace Target.Utility.Controllers
                 {
                     for (int j = selection.StartPixel.Y; j < selection.EndPixel.Y; j += 32)
                     {
+                        // This is to prevent selection that goes out of the image's bound
                         if (i + m > width || j + m > height)
                         {
                             continue;
@@ -278,6 +293,8 @@ namespace Target.Utility.Controllers
 
         /// <summary>
         /// Refactor this!!
+        /// Deprecated
+        /// Not usefull
         /// </summary>
         public static void ResizeBatch()
         {
@@ -309,7 +326,9 @@ namespace Target.Utility.Controllers
         }
 
         /// <summary>
-        /// refactor this
+        /// Refactor this!!
+        /// Deprecated
+        /// Not usefull
         /// </summary>
         /// <param name="width">The width.</param>
         /// <param name="height">The height.</param>
